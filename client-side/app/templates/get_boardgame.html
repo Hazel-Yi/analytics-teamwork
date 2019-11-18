@@ -1,0 +1,97 @@
+<html>
+  
+  <head>
+    <title>{{ title }}</title>
+    <style>
+      table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+      }
+      td, th {
+        border: 1px solid #dddddd;
+        text-align: center;
+        padding: 8px;
+      }
+      section {
+        display: -webkit-flex;
+        display: flex;
+      }
+      nav {
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+        background: #FFFAFA;
+        padding: 20px;
+      }
+      nav ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      nav a {
+        padding: 6px 8px 6px 16px;
+        text-decoration: none;
+        font-size: 18px;
+        color: #2196F3;
+        display: block;
+      }
+      article {
+        -webkit-flex: 3;
+        -ms-flex: 3;
+        flex: 3;
+        background-color: #FDF5E6;
+        padding: 10px;
+      }
+    </style>
+  </head>
+    
+  <body>
+    
+    <h1>GET /boardgame/</h1>
+    
+    <section>
+      <nav>
+        <ul>
+          <li><a href="{{ url_for('get_boardgame') }}">GET /boardgame/</a></li>
+          <li><a href="{{ url_for('get_boardgame_id') }}">GET /boardgame/id</a></li>
+          <li><a href="{{ url_for('get_rec') }}">GET /boardgame/id/rec?n=30</a></li>
+          <li><a href="{{ url_for('post_boardgame') }}">POST /boardgame/</a></li>
+          <li><a href="{{ url_for('put_boardgame') }}">PUT /boardgame/</a></li>
+        </ul>
+      </nav>
+
+      <article>
+        <table>
+          <tr>
+            <th width="40%">IMAGE</th>
+            <th width="40%">NAME</th>
+            <th width="20%">YEAR</th>
+          </tr>
+
+          <!--
+            make this part dynamic so it displays rows of games
+          -->
+
+          <tr>
+            <td>pic</td>
+            <td>Gloomhaven</td>
+            <td>2017</td>
+          </tr>
+          <tr>
+            <td>pic</td>
+            <td>Pandemic Legacy: Season 1</td>
+            <td>2015</td>
+          </tr>
+          <tr>
+            <td>pic</td>
+            <td>Through the Ages</td>
+            <td>2015</td>
+          </tr>
+        </table>
+      </article>
+    </section>
+    
+  </body>
+
+</html>
+

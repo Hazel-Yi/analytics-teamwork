@@ -1,0 +1,122 @@
+<html>
+  
+  <head>
+    <title>{{ title }}</title>
+    <style>
+      table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+      }
+      td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+      button {
+        border: none;
+        background-color: inherit;
+        padding: 14px 28px;
+        font-size: 16px;
+        cursor: pointer;
+        display: inline-block;
+      }
+      button:hover {
+        background: #eee;
+      }
+      section {
+        display: -webkit-flex;
+        display: flex;
+      }
+      nav {
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+        background: #FFFAFA;
+        padding: 20px;
+      }
+      nav ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      nav a {
+        padding: 6px 8px 6px 16px;
+        text-decoration: none;
+        font-size: 18px;
+        color: #2196F3;
+        display: block;
+      }
+      article {
+        -webkit-flex: 3;
+        -ms-flex: 3;
+        flex: 3;
+        background-color: #FDF5E6;
+        padding: 10px;
+      }
+    </style>
+  </head>
+    
+  <body>
+    
+    <h1>POST /boardgame/</h1>
+    
+    <section>
+      <nav>
+        <ul>
+          <li><a href="{{ url_for('get_boardgame') }}">GET /boardgame/</a></li>
+          <li><a href="{{ url_for('get_boardgame_id') }}">GET /boardgame/id</a></li>
+          <li><a href="{{ url_for('get_rec') }}">GET /boardgame/id/rec?n=30</a></li>
+          <li><a href="{{ url_for('post_boardgame') }}">POST /boardgame/</a></li>
+          <li><a href="{{ url_for('put_boardgame') }}">PUT /boardgame/</a></li>
+        </ul>
+      </nav>
+
+      <article>
+        <form method="post" id="post_board_game">
+          <table>
+            <tr>
+              <td width="20%">NAME</td>
+              <td>
+                <input name="name" type="text" placeholder="Name of the game" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">PUBLISHED BY</td>
+              <td>
+                <input name="published_by" type="text" placeholder="Publisher of the game" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">IMAGE</td>
+              <td>
+                <input name="image" type="text" placeholder="Attach image of the game" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">CATEGORIES</td>
+              <td>
+                <input name="categories" type="text" placeholder="Categories of the game" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">DESCRIPTION</td>
+              <td>
+                <input name="description" type="text" placeholder="Desription of the game" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">EXPANSIONS</td>
+              <td>
+                <input name="expansions" type="text" placeholder="Expansions of the game" required="required">
+              </td>
+            </tr>
+          </table>
+          <button type="submit" form="post_board_game">POST</button>
+        </form>
+      </article>
+
+    </section>
+    
+  </body>
+
+</html>
