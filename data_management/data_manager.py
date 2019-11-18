@@ -5,7 +5,7 @@ import os
 
 class DataManager:
 
-    def __init__(self, root_dir='..'):
+    def __init__(self, root_dir='.'):
         self.games_fn = os.path.join(root_dir, '2019-05-02.csv')
         self.details_fn = os.path.join(root_dir, 'games_detailed_info.csv')
         self.reviews_fn = os.path.join(root_dir, 'bgg-13m-reviews.csv')
