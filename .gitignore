@@ -1,6 +1,7 @@
 # COMP9321
 *.csv
 .DS_Store
+*.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

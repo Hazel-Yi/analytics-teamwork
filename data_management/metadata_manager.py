@@ -32,6 +32,11 @@ class MetaDataManager:
             self.metadata[key] = 0
         self.metadata[key] += amt
 
+    def getUsage(self, to_json=True):
+        if to_json:
+            return json.dumps(self.metadata)
+        return self.metadata
+
 
 if __name__ == '__main__':
     mm = MetaDataManager('..')

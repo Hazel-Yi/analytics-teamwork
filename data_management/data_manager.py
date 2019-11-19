@@ -1,7 +1,9 @@
 import pandas as pd
+import sqlite3
 import json
 import ast
 import os
+import sys
 
 class DataManager:
 
@@ -9,8 +11,10 @@ class DataManager:
         self.games_fn = os.path.join(root_dir, '2019-05-02.csv')
         self.details_fn = os.path.join(root_dir, 'games_detailed_info.csv')
         self.reviews_fn = os.path.join(root_dir, 'bgg-13m-reviews.csv')
+        self.db_fn = os.path.join(root_dir, 'Database.db')
         self.placeholder_img_url = 'https://via.placeholder.com/150x150?text=No+Image'
 
+        self._init_db() # only currently being used for reviews
         self._init_games()
         self._init_details()
 
@@ -43,6 +47,28 @@ class DataManager:
             return json.dumps(res_dict)
         return res_dict
 
+    def getBoardGameReviews(self, game_id, to_json=True):
+        try: # data sanitisation
+            game_id = int(game_id)
+            df = pd.read_sql_query('SELECT * FROM Reviews WHERE ID={}'.format(game_id), self.db_conn)
+            df = df.drop('index', axis=1)
+            return self.get_json_entries(df, None, None, to_json)
+        except ValueError:
+            print("getBoardGameReviews() failed: game id not an integer")
+        if to_json:
+            return "{}"
+        else:
+            return {}
+
+    #def insertBoardGameReview(self):
+
+
+
+    def _init_db(self):
+        if not os.path.exists(self.db_fn):
+            print("Missing database: {}".format(self.db_fn))
+            sys.exit(0)
+        self.db_conn = sqlite3.connect(self.db_fn)
 
     def _init_games(self):
         self.games = pd.read_csv(self.games_fn)
