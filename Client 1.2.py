@@ -130,4 +130,4 @@ if __name__ == '__main__':
     #df_details = df_details.infer_objects()
     #print(df_details.dtypes)
 
-    app.run(debug=True, port=800)
+    app.run(debug=True, port=8000)
