@@ -53,7 +53,6 @@ class Board_Games_List(Resource):
     @api.doc(description="Add a new board game")
     @api.expect(detail_model, validate=True)
     def post(self):
-        #df_details_POST = pd.read_csv('games_detailed_info.csv')
         game = request.json
         id = df_details_POST.index[-1] + 1
 
@@ -131,27 +130,6 @@ if __name__ == '__main__':
     #print(type(int(game_id)))
 
     app.run(host = '127.0.0.1', port = 8000, debug=True)
-    
-    
-    
-    #id = df.index[-1] + 1
-    #index = df[df.columns[0]].index[-1] + 1
-    #print(id, index)
-    #print(df.tail(1))
-    #print(df['Unnamed: 0'])
-    #print(df.iloc[:,0])
-    #print(df.tail(1))
-    #df.loc[id, 0] = 123
-    #print(df.iloc[17062][0])
-    #df.insert(id, 1, str(index), allow_duplicates = False)
-    #df_details2 = dm2.getDetails()
-    #df = pd.DataFrame(df_details2)
-    #df = pd.read_csv('games_detailed_info.csv')
-    #df = df[df.columns[0]].index[-1] + 1
-    #print(df)
-    #print(df_details.dtypes)
-    #df_details = df_details.infer_objects()
-    #print(df.dtypes)
-    #print(df_details.dtypes)
 
+    
     
