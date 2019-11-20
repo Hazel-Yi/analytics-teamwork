@@ -1,26 +1,45 @@
 from flask import Flask, render_template, request
+import requests
 from app import app
-
+import json
 
 @app.route('/')
 @app.route('/get_boardgame')
 def get_boardgame():
-  '''get data from the file'''
-  return render_template('get_boardgame.html', title='Get Boardgames')
+  r = requests.get("http://127.0.0.1:8000/games", params={'order': 'Name', 'ascending':True})
+  games = r.json()
+  game = games[1]
+  for key in game.keys():
+    if key == 'ID':
+      game_id = str(game[key])
+    if key == 'Name':
+      name = str(game[key])
+    if key == 'Year Published':
+      year = str(game[key])
+  print(game_id + name + year)
+  return render_template('get_boardgame.html', title='Get Boardgames', game_id=game_id, name=name, year=year)
+    
 
 @app.route('/get_boardgame_id', methods=['GET', 'POST'])
 def get_boardgame_id():
   if request.method == 'POST':
     search_id = request.form['search']
     print("searched for a game with id " + search_id) 
-    '''get data from the file'''
-    name = "abc"
-    image = "abc"
-    published_by = "abc"
-    categories = "abc"
-    description = "abc"
-    expansions = "abc"
-    return render_template('get_boardgame_id_2.html', title='Get Boardgame ID', name=name, image=image, published_by=published_by, categories=categories, description=description, expansions=expansions)
+    r = requests.get("http://127.0.0.1:8000/games/" + str(search_id))
+    game = r.json()
+    for key in game.keys():
+      if key == 'Name':
+        name = str(game[key])
+      if key == 'Publisher':
+        published_by = str(game[key])
+      if key == 'Category':
+        categories = str(game[key])
+      if key == 'Description':
+        description = str(game[key])
+      if key == 'Expansion':
+        expansions = str(game[key])
+    print(name)
+    return render_template('get_boardgame_id_2.html', title='Get Boardgame ID', name=name, published_by=published_by, categories=categories, description=description, expansions=expansions)
   else:
     return render_template('get_boardgame_id.html', title='Get Boardgame ID')
 
