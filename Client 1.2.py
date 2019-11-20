@@ -90,7 +90,7 @@ class Board_Games(Resource):
     ###GET GAME BY ID###
     def get(self, id):
         game = df_details.loc[df_details['ID'] == id]
-        game_row = dm.get_json_entries(game, 0, 1, False)
+        game_row = dm.get_json_entries(game, 0, 1, False)[0]
         mm.increment('/board_game/POST {}'.format(id))
         if not game_row:
             api.abort(404, "Game {} doesn't exist".format(id))
