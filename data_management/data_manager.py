@@ -8,15 +8,10 @@ import sys
 class DataManager:
 
     def __init__(self, root_dir='.'):
-        self.games_fn = os.path.join(root_dir, '2019-05-02.csv')
-        self.details_fn = os.path.join(root_dir, 'games_detailed_info.csv')
-        self.reviews_fn = os.path.join(root_dir, 'bgg-13m-reviews.csv')
         self.db_fn = os.path.join(root_dir, 'Database.db')
         self.placeholder_img_url = 'https://via.placeholder.com/150x150?text=No+Image'
-
-        self._init_db() # only currently being used for reviews
-        self._init_games()
-        self._init_details()
+        self.details_listcat = ['Publisher', 'Category', 'Expansion', 'Mechanic']
+        self._init_db()
 
     # Get row entries of dataframe, starting from a row index num_rows and extending for
     # num_rows. Output can be either in JSON or dict. All numpy NaN and NA values are converted to
@@ -61,7 +56,7 @@ class DataManager:
             return {}
 
     #def insertBoardGameReview(self):
-
+        
 
 
     def _init_db(self):
@@ -70,16 +65,19 @@ class DataManager:
             sys.exit(0)
         self.db_conn = sqlite3.connect(self.db_fn)
 
-    def _init_games(self):
-        self.games = pd.read_csv(self.games_fn)
-        self.games = self.games.drop(columns=['Bayes average', 'URL'])
-        # handle any NaN values that don't affect the ML model
-        self.games['Thumbnail'] = self.games['Thumbnail'].fillna(self.placeholder_img_url)
 
-    def _init_details(self):
-        self.details = pd.read_csv(self.details_fn)
-        self.details = self.details[['id','primary','boardgamepublisher','boardgamecategory','minplayers','maxplayers','minage','minplaytime','description','boardgameexpansion','boardgamemechanic','image', 'yearpublished']]
-        self.details.columns = ['ID','Name',   'Publisher',         'Category',         'Min players','Max players','Min age','Min playtime','Description','Expansion',     'Mechanic',         'Thumbnail', 'Year Published']
-        # handle any NaN values that don't affect the ML model
-        self.details['Thumbnail'] = self.details['Thumbnail'].fillna(self.placeholder_img_url)
-        self.details_listcat = ['Publisher', 'Category', 'Expansion', 'Mechanic']
+    # [OLD CSV CODE]
+    #
+    # def _init_games(self):
+    #     self.games = pd.read_csv(self.games_fn)
+    #     self.games = self.games.drop(columns=['Bayes average', 'URL'])
+    #     # handle any NaN values that don't affect the ML model
+    #     self.games['Thumbnail'] = self.games['Thumbnail'].fillna(self.placeholder_img_url)
+
+    # def _init_details(self):
+    #     self.details = pd.read_csv(self.details_fn)
+    #     self.details = self.details[['id','primary','boardgamepublisher','boardgamecategory','minplayers','maxplayers','minage','minplaytime','description','boardgameexpansion','boardgamemechanic','image', 'yearpublished']]
+    #     self.details.columns = ['ID','Name',   'Publisher',         'Category',         'Min players','Max players','Min age','Min playtime','Description','Expansion',     'Mechanic',         'Thumbnail', 'Year Published']
+    #     # handle any NaN values that don't affect the ML model
+    #     self.details['Thumbnail'] = self.details['Thumbnail'].fillna(self.placeholder_img_url)
+    #     self.details_listcat = ['Publisher', 'Category', 'Expansion', 'Mechanic']

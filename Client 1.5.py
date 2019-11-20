@@ -126,14 +126,16 @@ class Board_Games(Resource):
         details = request.json
         conn = create_connection('Database')
         c = conn.cursor()
+        print("SELECT Detail_ID FROM Details WHERE Game_ID = {}".format(id))
         df = pd.read_sql_query("SELECT Detail_ID FROM Details WHERE Game_ID = {}".format(id), conn)
         index = df.loc[0][0]
         
+
         for key in details:
             if key not in detail_model.keys():
                 return {"message": "Property {} is invalid".format(key)}, 400
 
-        c.execute("UPDATE Details SET Name=%s, Publisher=%s, Category=%s, Min_players=%i, Max_players=%i, Min_age=%i, Min_playtime=%i, Description=%s, Expansion=%s, Mechanic=%s, Thumbnail=%s, Year_Published=%i WHERE Detail_ID=%i;" % (
+        c.execute('UPDATE Details SET Name="%s", Publisher="%s", Category="%s", Min_players=%i, Max_players=%i, Min_age=%i, Min_playtime=%i, Description="%s", Expansion="%s", Mechanic="%s", Thumbnail="%s", Year_Published=%i WHERE Detail_ID=%i;' % (
                 str(details['Name']),
                 str(details['Publisher']),
                 str(details['Category']),
