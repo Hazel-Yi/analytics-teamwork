@@ -78,8 +78,8 @@ class DataManager:
 
     def _init_details(self):
         self.details = pd.read_csv(self.details_fn)
-        self.details = self.details[['id','primary','boardgamepublisher','boardgamecategory','minplayers','maxplayers','minage','minplaytime','description','boardgameexpansion','boardgamemechanic','image']]
-        self.details.columns = ['ID','Name',   'Publisher',         'Category',         'Min players','Max players','Min age','Min playtime','Description','Expansion',     'Mechanic',         'Thumbnail']
+        self.details = self.details[['id','primary','boardgamepublisher','boardgamecategory','minplayers','maxplayers','minage','minplaytime','description','boardgameexpansion','boardgamemechanic','image', 'yearpublished']]
+        self.details.columns = ['ID','Name',   'Publisher',         'Category',         'Min players','Max players','Min age','Min playtime','Description','Expansion',     'Mechanic',         'Thumbnail', 'Year Published']
         # handle any NaN values that don't affect the ML model
         self.details['Thumbnail'] = self.details['Thumbnail'].fillna(self.placeholder_img_url)
         self.details_listcat = ['Publisher', 'Category', 'Expansion', 'Mechanic']
