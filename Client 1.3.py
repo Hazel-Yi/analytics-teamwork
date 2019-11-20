@@ -21,21 +21,20 @@ review_model = api.model('Review', {
 
 
 detail_model = api.model('Detail', {
-    #'ID': fields.Integer,
-    'Name': fields.String,
-    'Publisher': fields.List(fields.String),
-    'Category': fields.List(fields.String),
-    'Min players': fields.Integer,
-    'Max players': fields.Integer,
-    'Min age': fields.Integer,
-    'Min playtime': fields.Integer,
-    'Description': fields.String,
-    'Expansion': fields.List(fields.String),
-    'Mechanic': fields.List(fields.String),
-    'Thumbnail': fields.Url,
-    'Year Published': fields.Integer
+    'id': fields.Integer,
+    'primary': fields.String,
+    'boardgamepublisher': fields.List(fields.String),
+    'boardgamecategory': fields.List(fields.String),
+    'minplayers': fields.Integer,
+    'maxplayers': fields.Integer,
+    'minage': fields.Integer,
+    'minplaytime': fields.Integer,
+    'description': fields.String,
+    'boardgameexpansion': fields.List(fields.String),
+    'boardgamemechanic': fields.List(fields.String),
+    'image': fields.String,
+    'yearpublished': fields.Integer
 })
-
 
 
 @api.route('/games')
@@ -47,28 +46,27 @@ class Board_Games_List(Resource):
         mm.increment('/board_game')
         return dm.get_json_entries(dm.details, None, None, False)
 
-    ###POST NEW GAME (onto copy df)###
+
+    ###POST###
     @api.response(201, 'Board Game Added Successfully')
     @api.response(400, 'Validation Error')
     @api.doc(description="Add a new board game")
     @api.expect(detail_model, validate=True)
     def post(self):
         game = request.json
-        id = df_details.index[-1] + 1
-
-        if id in df_details.index:
-            return {"message": "A game with ID={} is already in the dataset".format(id)}, 400
+        id = df_details_POST.index[-1] + 1
 
         for key in game:
             if key not in detail_model.keys():
                 return {"message": "Property {} is invalid".format(key)}, 400
 
-        df_details.loc[id, 'ID'] = id
+        df_details_POST.loc[id, 'index'] = id
 
         for key in game:
-            df_details.loc[id, key] = game[key]
-
-        return {"message": "Game {} is created with ID {}".format(game['Name'], id)}, 201
+            df_details_POST.loc[id, key] = game[key]
+        df_details_POST.to_csv('games_detailed_info.csv')
+        mm.increment('/board_game/POST {}'.format(id))
+        return {"message": "Game {} is created with ID {}".format(game['primary'], game['id'])}, 201
 
 ###GET API STATS###
 @api.route('/api_usage')
@@ -77,9 +75,8 @@ class Api_Usage(Resource):
     @api.doc(description='Get Api Usage Stats')
     def get(self):
         api_usage = mm.metadata
+        mm.increment('/api_usage')
         return api_usage
-
-
 
 @api.route('/games/<int:id>')
 @api.param('id', 'Game ID')
@@ -91,9 +88,11 @@ class Board_Games(Resource):
     def get(self, id):
         game = df_details.loc[df_details['ID'] == id]
         game_row = dm.get_json_entries(game, 0, 1, False)[0]
-        mm.increment('/board_game/POST {}'.format(id))
+        
         if not game_row:
             api.abort(404, "Game {} doesn't exist".format(id))
+        
+        mm.increment('/board_game/{}'.format(id))
         return game_row
 
 
@@ -102,20 +101,19 @@ class Board_Games(Resource):
     @api.response(200, 'Successful')
     @api.expect(detail_model)
     @api.doc(description="Update a game by its ID")
-    ###UPDATE (onto copy df)###
+    ###UPDATE###
     def put(self, id):
-
-        #if id not in df_details.index:
-            #api.abort(404, "Game {} doesn't exist".format(id))
-
+        game_id = df_details.loc[df_details['ID'] == id].index[0]
         game = request.json
-
         for key in game:
             if key not in detail_model.keys():
                 return {"message": "Property {} is invalid".format(key)}, 400
 
         for key in game:
-            df_details.loc[id, key] = game[key]
+            df_details_POST.loc[int(game_id), key] = game[key]
+
+        df_details_POST.to_csv('games_detailed_info.csv')
+        mm.increment('/board_game/PUT {}'.format(id))
 
         return {"message": "Game {} has been successfully updated".format(id)}, 200
 
@@ -126,8 +124,12 @@ if __name__ == '__main__':
     df_games = dm.get_json_entries(dm.games, None, None, False)
     df_details = dm.details
 
-    #print(df_details.dtypes)
-    #df_details = df_details.infer_objects()
-    #print(df_details.dtypes)
+    df_details_POST = pd.read_csv('games_detailed_info.csv')
+    df_details_POST.rename(columns ={'Unnamed: 0' : 'index'}, inplace=True)
+    #game_id = df_details.loc[df_details['ID'] == 100000].index[0]
+    #print(type(int(game_id)))
 
-    app.run(debug=True, port=8000)
+    app.run(host = '127.0.0.1', port = 8000, debug=True)
+
+    
+    
