@@ -19,33 +19,21 @@ review_model = api.model('Review', {
     'Name': fields.String
 })
 
-""" detail_model = api.model('Detail', {
-    'ID': fields.Integer,
-    'Name': fields.String,
-    'Publisher': fields.List,
-    'Category': fields.List,
-    'Min players': fields.Integer,
-    'Max players': fields.Integer,
-    'Min age': fields.Integer,
-    'Min playtime': fields.Integer,
-    'Description': fields.String,
-    'Expansion': fields.List,
-    'Mechanic': fields.List,
-    'Thumbnail': fields.Url
-}) """
 
 detail_model = api.model('Detail', {
+    #'ID': fields.Integer,
     'Name': fields.String,
-    'Publisher': fields.String,
-    'Category': fields.String,
+    'Publisher': fields.List(fields.String),
+    'Category': fields.List(fields.String),
     'Min players': fields.Integer,
     'Max players': fields.Integer,
     'Min age': fields.Integer,
     'Min playtime': fields.Integer,
     'Description': fields.String,
-    'Expansion': fields.String,
-    'Mechanic': fields.String,
-    'Thumbnail': fields.String
+    'Expansion': fields.List(fields.String),
+    'Mechanic': fields.List(fields.String),
+    'Thumbnail': fields.Url,
+    'Year Published': fields.Integer
 })
 
 
