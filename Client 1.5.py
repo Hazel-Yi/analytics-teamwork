@@ -90,7 +90,7 @@ class Board_Games_Details_List(Resource):
                 return {"message": "Property {} is invalid".format(key)}, 400
 
         conn = create_connection('Database')
-        df = pd.read_sql_query("SELECT Name FROM Games WHERE Game_ID = {};".format(details['Game_ID']), conn)
+        df = pd.read_sql_query("SELECT Name FROM Details WHERE Game_ID = {};".format(details['Game_ID']), conn)
         if len(df) > 0:
             api.abort(400, "Game {} already exists".format(details['Game_ID']))
         c = conn.cursor()
