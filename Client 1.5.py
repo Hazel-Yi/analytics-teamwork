@@ -2,19 +2,28 @@ import sqlite3
 import json
 import ast
 import pandas as pd
-from flask import Flask, request
-from flask_restplus import Resource, Api, fields, inputs
+from flask import Flask, request, jsonify
+from flask_restplus import Resource, Api, fields, inputs, abort
 from data_management import metadata_manager
 from Create_db import create_connection
-from itsdangerous import JSONWebSignatureSerializer
+from itsdangerous import JSONWebSignatureSerializer as Serializer
+from auth import *
 
-secret_key = "secret"
 
 app = Flask(__name__)
 api = Api(app, version='1.5', default="Board Game Geek",
-          title="Board Game Geek", description="...")
+          title="Board Game Geek Dataset", description="...",
+          authorizations={
+              'API-KEY': {
+                  'type': 'apiKey',
+                  'in': 'header',
+                  'name': 'AUTH-TOKEN'
+              }
+          },
+          security='API-KEY')
 
 mm = metadata_manager.MetaDataManager()
+
 
 # Get row entries of dataframe, starting from a row index num_rows and extending for
 # num_rows. Output can be in dict. All numpy NaN and NA values are converted to
@@ -198,6 +207,7 @@ class addReviews(Resource):
     @api.response(400, 'Validation Error')
     @api.doc(description="Add a new review")
     @api.expect(review_model, validate=True)
+    @requires_auth
     def post(self):
         review = request.json
 
@@ -241,18 +251,13 @@ class Reviews(Resource):
         return review, 200
 
 
-@api.route('/token')
+@api.route('/auth')
 class Token(Resource):
     @api.response(200, 'Successful')
     @api.doc(description="Get a token to access the end points")
     def get(self):
-        # No expiry
-        s = JSONWebSignatureSerializer(secret_key)
-        token = str(s.dumps(0))
-        print(token)
-        return {'token': token}, 200
+        return {'token': auth.generate_token().decode()}, 200
 
 
 if __name__ == '__main__':
-
     app.run(host='127.0.0.1', port=8000, debug=True)
