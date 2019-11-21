@@ -90,6 +90,9 @@ class Board_Games_Details_List(Resource):
                 return {"message": "Property {} is invalid".format(key)}, 400
 
         conn = create_connection('Database')
+        df = pd.read_sql_query("SELECT Name FROM Games WHERE Game_ID = {};".format(details['Game_ID']), conn)
+        if len(df) > 0:
+            api.abort(400, "Game {} already exists".format(details['Game_ID']))
         c = conn.cursor()
         c.execute("INSERT INTO Details(Game_ID, Name, Publisher, Category, Min_players, Max_players, Min_age, Min_playtime, Description, Expansion, Mechanic, Thumbnail, Year_Published) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (details['Game_ID'],
