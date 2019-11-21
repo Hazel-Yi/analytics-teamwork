@@ -1,5 +1,6 @@
 import sqlite3
 import json
+import ast
 import pandas as pd
 from flask import Flask, request
 from flask_restplus import Resource, Api, fields, inputs
@@ -9,8 +10,27 @@ from Create_db import create_connection
 app = Flask(__name__)
 api = Api(app, version='1.5', default="Board Game Geek", title="Board Game Geek", description="...")
 
-dm = data_manager.DataManager()
 mm = metadata_manager.MetaDataManager()
+
+# Get row entries of dataframe, starting from a row index num_rows and extending for
+# num_rows. Output can be either in JSON or dict. All numpy NaN and NA values are converted to
+# null / None. A list of dataframe column names can be provided to interpret each element under 
+# that column as a list.
+def get_json_entries(df, start_pos=None, num_rows=None, to_json=True, keyval_list=[]):
+    if start_pos == None:
+        start_pos = 0
+    end_pos = len(df.index) if (num_rows == None) else min(start_pos + num_rows, len(df.index))
+    selected = df.iloc[start_pos : end_pos].replace({pd.np.nan: None})
+    # all remaining NaN values to be converted to None (client is pure Python)
+    # all specified keys to interpret their vals as Python lists (if not None)
+    row_entries = selected.to_dict(orient='records')
+    if len(keyval_list) > 0:
+        for i in range(len(row_entries)): # row
+            for key in keyval_list: # specified column (key)
+                if row_entries[i][key] != None: # null or list
+                    row_entries[i][key] = ast.literal_eval(row_entries[i][key])
+    return row_entries
+
 
 review_model = api.model('Review', {
     'Game_ID': fields.Integer,
@@ -54,7 +74,9 @@ class Board_Games_Details_List(Resource):
     ###GET GAMES DETAILS###
     def get(self):
         mm.increment('/board_games_details')
-        return dm.get_json_entries(dm.details, None, None, False)
+        conn = create_connection('Database')
+        df = pd.read_sql_query("SELECT * FROM Details limit 1;", conn)
+        return get_json_entries(df)
 
     ###POST###
     @api.response(201, 'Board Game Details Added Successfully')
@@ -135,7 +157,7 @@ class Board_Games(Resource):
             if key not in detail_model.keys():
                 return {"message": "Property {} is invalid".format(key)}, 400
 
-        c.execute('UPDATE Details SET Name="%s", Publisher="%s", Category="%s", Min_players=%i, Max_players=%i, Min_age=%i, Min_playtime=%i, Description="%s", Expansion="%s", Mechanic="%s", Thumbnail="%s", Year_Published=%i WHERE Detail_ID=%i;' % (
+        c.execute('UPDATE Details SET Name=?, Publisher=?, Category=?, Min_players=?, Max_players=?, Min_age=?, Min_playtime=?, Description=?, Expansion=?, Mechanic=?, Thumbnail=?, Year_Published=? WHERE Detail_ID=?;', (
                 str(details['Name']),
                 str(details['Publisher']),
                 str(details['Category']),
