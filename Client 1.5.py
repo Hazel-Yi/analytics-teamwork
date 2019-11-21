@@ -4,7 +4,7 @@ import ast
 import pandas as pd
 from flask import Flask, request
 from flask_restplus import Resource, Api, fields, inputs
-from data_management import data_manager, metadata_manager
+from data_management import metadata_manager
 from Create_db import create_connection
 
 app = Flask(__name__)
@@ -24,7 +24,7 @@ def get_json_entries(df, start_pos=None, num_rows=None, to_json=True, keyval_lis
     # all remaining NaN values to be converted to None (client is pure Python)
     # all specified keys to interpret their vals as Python lists (if not None)
     row_entries = selected.to_dict(orient='records')
-    if len(keyval_list) > 0:
+    if len(keyval_list) > 0: # necessary for json output as well
         for i in range(len(row_entries)): # row
             for key in keyval_list: # specified column (key)
                 if row_entries[i][key] != None: # null or list
