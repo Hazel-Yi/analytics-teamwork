@@ -6,28 +6,35 @@ from flask import Flask, request
 from flask_restplus import Resource, Api, fields, inputs
 from data_management import metadata_manager
 from Create_db import create_connection
+from itsdangerous import JSONWebSignatureSerializer
+
+secret_key = "secret"
 
 app = Flask(__name__)
-api = Api(app, version='1.5', default="Board Game Geek", title="Board Game Geek", description="...")
+api = Api(app, version='1.5', default="Board Game Geek",
+          title="Board Game Geek", description="...")
 
 mm = metadata_manager.MetaDataManager()
 
 # Get row entries of dataframe, starting from a row index num_rows and extending for
 # num_rows. Output can be in dict. All numpy NaN and NA values are converted to
-# null / None. A list of dataframe column names can be provided to interpret each element under 
+# null / None. A list of dataframe column names can be provided to interpret each element under
 # that column as a list.
+
+
 def get_dict_entries(df, start_pos=None, num_rows=None, keyval_list=[]):
     if start_pos == None:
         start_pos = 0
-    end_pos = len(df.index) if (num_rows == None) else min(start_pos + num_rows, len(df.index))
-    selected = df.iloc[start_pos : end_pos].replace({pd.np.nan: None})
+    end_pos = len(df.index) if (num_rows == None) else min(
+        start_pos + num_rows, len(df.index))
+    selected = df.iloc[start_pos: end_pos].replace({pd.np.nan: None})
     # all remaining NaN values to be converted to None (client is pure Python)
     # all specified keys to interpret their vals as Python lists (if not None)
     row_entries = selected.to_dict(orient='records')
     if len(keyval_list) > 0:
-        for i in range(len(row_entries)): # row
-            for key in keyval_list: # specified column (key)
-                if row_entries[i][key] != None: # null or list
+        for i in range(len(row_entries)):  # row
+            for key in keyval_list:  # specified column (key)
+                if row_entries[i][key] != None:  # null or list
                     row_entries[i][key] = ast.literal_eval(row_entries[i][key])
     return row_entries
 
@@ -51,7 +58,7 @@ detail_model = api.model('Detail', {
     'Description': fields.String,
     'Expansion': fields.List(fields.String),
     'Mechanic': fields.List(fields.String),
-    'Thumbnail': fields.Url, ###
+    'Thumbnail': fields.Url,
     'Year_Published': fields.Integer
 })
 
@@ -63,9 +70,10 @@ game_model = api.model('Game', {
     'Average': fields.Float,
     'Bayes_Average': fields.Float,
     'Users_Rated': fields.Integer,
-    'URL': fields.Url, ###
-    'Thumbnail': fields.Url ###
+    'URL': fields.Url,
+    'Thumbnail': fields.Url
 })
+
 
 @api.route('/details')
 class Board_Games_Details_List(Resource):
@@ -75,7 +83,8 @@ class Board_Games_Details_List(Resource):
     def get(self):
         mm.increment('/details')
         conn = create_connection('Database')
-        df = pd.read_sql_query("SELECT * FROM Details;", conn)  ### Chunk this to be loaded onto multiple pages
+        # Chunk this to be loaded onto multiple pages
+        df = pd.read_sql_query("SELECT * FROM Details;", conn)
         return get_dict_entries(df)
 
     ###POST###
@@ -90,24 +99,25 @@ class Board_Games_Details_List(Resource):
                 return {"message": "Property {} is invalid".format(key)}, 400
 
         conn = create_connection('Database')
-        df = pd.read_sql_query("SELECT Name FROM Details WHERE Game_ID = {};".format(details['Game_ID']), conn)
+        df = pd.read_sql_query(
+            "SELECT Name FROM Details WHERE Game_ID = {};".format(details['Game_ID']), conn)
         if len(df) > 0:
             api.abort(400, "Game {} already exists".format(details['Game_ID']))
         c = conn.cursor()
         c.execute("INSERT INTO Details(Game_ID, Name, Publisher, Category, Min_players, Max_players, Min_age, Min_playtime, Description, Expansion, Mechanic, Thumbnail, Year_Published) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                (details['Game_ID'],
-                details['Name'],
-                str(details['Publisher']),
-                str(details['Category']),
-                details['Min_players'],
-                details['Max_players'],
-                details['Min_age'],
-                details['Min_playtime'],
-                details['Description'],
-                str(details['Expansion']),
-                str(details['Mechanic']),
-                details['Thumbnail'],
-                details['Year_Published']))
+                  (details['Game_ID'],
+                   details['Name'],
+                   str(details['Publisher']),
+                   str(details['Category']),
+                   details['Min_players'],
+                   details['Max_players'],
+                   details['Min_age'],
+                   details['Min_playtime'],
+                   details['Description'],
+                   str(details['Expansion']),
+                   str(details['Mechanic']),
+                   details['Thumbnail'],
+                   details['Year_Published']))
         conn.commit()
         mm.increment('/board_games_details/POST {}'.format(id))
         return {"message": "Game {} is created with ID {}".format(details['Name'], details['Game_ID'])}, 201
@@ -122,6 +132,7 @@ class Api_Usage(Resource):
         mm.increment('/api_usage')
         return api_usage, 200
 
+
 @api.route('/details/<int:id>')
 @api.param('id', 'Game ID')
 class Board_Games(Resource):
@@ -131,16 +142,15 @@ class Board_Games(Resource):
     ###GET GAME BY ID###
     def get(self, id):
         conn = create_connection('Database')
-        df = pd.read_sql_query("SELECT * FROM Details WHERE Game_ID = {};".format(id), conn)
+        df = pd.read_sql_query(
+            "SELECT * FROM Details WHERE Game_ID = {};".format(id), conn)
         if len(df) == 0:
             api.abort(404, "Game {} doesn't exist".format(id))
         details = df.loc[0].to_json()
         details = json.loads(details)
-   
-        
+
         mm.increment('/board_games_details/{}'.format(id))
         return details, 200
-
 
     @api.response(404, 'Game not found')
     @api.response(400, 'Validation Error')
@@ -153,33 +163,34 @@ class Board_Games(Resource):
         conn = create_connection('Database')
         c = conn.cursor()
         print("SELECT Detail_ID FROM Details WHERE Game_ID = {}".format(id))
-        df = pd.read_sql_query("SELECT Detail_ID FROM Details WHERE Game_ID = {}".format(id), conn)
+        df = pd.read_sql_query(
+            "SELECT Detail_ID FROM Details WHERE Game_ID = {}".format(id), conn)
         index = df.loc[0][0]
-        
 
         for key in details:
             if key not in detail_model.keys():
                 return {"message": "Property {} is invalid".format(key)}, 400
 
         c.execute('UPDATE Details SET Name=?, Publisher=?, Category=?, Min_players=?, Max_players=?, Min_age=?, Min_playtime=?, Description=?, Expansion=?, Mechanic=?, Thumbnail=?, Year_Published=? WHERE Detail_ID=?;', (
-                str(details['Name']),
-                str(details['Publisher']),
-                str(details['Category']),
-                details['Min_players'],
-                details['Max_players'],
-                details['Min_age'],
-                details['Min_playtime'],
-                str(details['Description']),
-                str(details['Expansion']),
-                str(details['Mechanic']),
-                str(details['Thumbnail']),
-                details['Year_Published'],
-                int(index)))
+            str(details['Name']),
+            str(details['Publisher']),
+            str(details['Category']),
+            details['Min_players'],
+            details['Max_players'],
+            details['Min_age'],
+            details['Min_playtime'],
+            str(details['Description']),
+            str(details['Expansion']),
+            str(details['Mechanic']),
+            str(details['Thumbnail']),
+            details['Year_Published'],
+            int(index)))
 
         conn.commit()
         mm.increment('/board_games_details/PUT {}'.format(id))
 
         return {"message": "Game {} has been successfully updated".format(id)}, 200
+
 
 @api.route('/reviews')
 class addReviews(Resource):
@@ -195,18 +206,18 @@ class addReviews(Resource):
                 return {"message": "Property {} is invalid".format(key)}, 400
 
         conn = create_connection('Database')
-        df = pd.read_sql_query("SELECT Name FROM Games WHERE ID = {};".format(review['Game_ID']), conn)
+        df = pd.read_sql_query(
+            "SELECT Name FROM Games WHERE ID = {};".format(review['Game_ID']), conn)
         if len(df) == 0:
             api.abort(404, "Game {} doesn't exist".format(review['Game_ID']))
         Name = df.loc[0][0]
         c = conn.cursor()
-        c.execute("INSERT INTO Reviews(User, Rating, Game_ID, Comment, Name) VALUES(?,?,?,?,?)", (review['User'], review['Rating'], review['Game_ID'], review['Comment'], Name))
+        c.execute("INSERT INTO Reviews(User, Rating, Game_ID, Comment, Name) VALUES(?,?,?,?,?)",
+                  (review['User'], review['Rating'], review['Game_ID'], review['Comment'], Name))
         last_row = c.lastrowid
         conn.commit()
         mm.increment('/reviews/POST {}'.format(id))
         return {"message": "Review for game '{}' has been added with ID {}".format(Name, last_row)}, 201
-
-
 
 
 @api.route('/reviews/<int:id>')
@@ -218,7 +229,8 @@ class Reviews(Resource):
     ###GET REVIEW BY ID###
     def get(self, id):
         conn = create_connection('Database')
-        df = pd.read_sql_query("SELECT * FROM Reviews WHERE Review_ID = {};".format(id), conn)
+        df = pd.read_sql_query(
+            "SELECT * FROM Reviews WHERE Review_ID = {};".format(id), conn)
         if len(df) == 0:
             api.abort(404, "Review {} doesn't exist".format(id))
         review = df.loc[0].to_json()
@@ -229,8 +241,18 @@ class Reviews(Resource):
         return review, 200
 
 
+@api.route('/token')
+class Token(Resource):
+    @api.response(200, 'Successful')
+    @api.doc(description="Get a token to access the end points")
+    def get(self):
+        # No expiry
+        s = JSONWebSignatureSerializer(secret_key)
+        token = str(s.dumps(0))
+        print(token)
+        return {'token': token}, 200
+
+
 if __name__ == '__main__':
 
-    app.run(host = '127.0.0.1', port = 8000, debug=True)
-
-    
+    app.run(host='127.0.0.1', port=8000, debug=True)
