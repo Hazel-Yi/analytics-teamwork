@@ -75,7 +75,7 @@ class Board_Games_Details_List(Resource):
     def get(self):
         mm.increment('/board_games_details')
         conn = create_connection('Database')
-        df = pd.read_sql_query("SELECT * FROM Details limit 1;", conn)
+        df = pd.read_sql_query("SELECT * FROM Details;", conn)
         return get_json_entries(df)
 
     ###POST###
