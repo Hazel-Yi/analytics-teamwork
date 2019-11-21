@@ -73,10 +73,10 @@ class Board_Games_Details_List(Resource):
     @api.doc(description='Get all board games details')
     ###GET GAMES DETAILS###
     def get(self):
-        mm.increment('/board_games_details')
         conn = create_connection('Database')
-        df = pd.read_sql_query("SELECT * FROM Details;", conn)
-        return get_json_entries(df)
+        df = pd.read_sql_query("SELECT * FROM Details", conn)  ### Chunk this to be loaded onto multiple pages
+        mm.increment('/board_games_details')
+        return dm.get_json_entries(df, None, None, False)
 
     ###POST###
     @api.response(201, 'Board Game Details Added Successfully')
@@ -129,10 +129,11 @@ class Board_Games(Resource):
     def get(self, id):
         conn = create_connection('Database')
         df = pd.read_sql_query("SELECT * FROM Details WHERE Game_ID = {};".format(id), conn)
+        if len(df) == 0:
+            api.abort(404, "Game {} doesn't exist".format(id))
         details = df.loc[0].to_json()
         details = json.loads(details)
-        if not details:
-            api.abort(404, "Game {} doesn't exist".format(id))
+   
         
         mm.increment('/board_games_details/{}'.format(id))
         return details, 200
@@ -192,6 +193,8 @@ class addReviews(Resource):
 
         conn = create_connection('Database')
         df = pd.read_sql_query("SELECT Name FROM Games WHERE ID = {};".format(review['Game_ID']), conn)
+        if len(df) == 0:
+            api.abort(404, "Game {} doesn't exist".format(review['Game_ID']))
         Name = df.loc[0][0]
         c = conn.cursor()
         c.execute("INSERT INTO Reviews(User, Rating, Game_ID, Comment, Name) VALUES(?,?,?,?,?)", (review['User'], review['Rating'], review['Game_ID'], review['Comment'], Name))
@@ -212,8 +215,10 @@ class Reviews(Resource):
     ###GET REVIEW BY ID###
     def get(self, id):
         conn = create_connection('Database')
-        review = pd.read_sql_query("SELECT * FROM Reviews WHERE Review_ID = {};".format(id), conn)
-        review = review.loc[0].to_json()
+        df = pd.read_sql_query("SELECT * FROM Reviews WHERE Review_ID = {};".format(id), conn)
+        if len(df) == 0:
+            api.abort(404, "Review {} doesn't exist".format(id))
+        review = df.loc[0].to_json()
         review = json.loads(review)
         mm.increment('/review/{}'.format(id))
         if not review:
