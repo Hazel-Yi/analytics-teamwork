@@ -13,10 +13,10 @@ api = Api(app, version='1.5', default="Board Game Geek", title="Board Game Geek"
 mm = metadata_manager.MetaDataManager()
 
 # Get row entries of dataframe, starting from a row index num_rows and extending for
-# num_rows. Output can be either in JSON or dict. All numpy NaN and NA values are converted to
+# num_rows. Output can be in dict. All numpy NaN and NA values are converted to
 # null / None. A list of dataframe column names can be provided to interpret each element under 
 # that column as a list.
-def get_json_entries(df, start_pos=None, num_rows=None, to_json=True, keyval_list=[]):
+def get_dict_entries(df, start_pos=None, num_rows=None, keyval_list=[]):
     if start_pos == None:
         start_pos = 0
     end_pos = len(df.index) if (num_rows == None) else min(start_pos + num_rows, len(df.index))
@@ -24,7 +24,7 @@ def get_json_entries(df, start_pos=None, num_rows=None, to_json=True, keyval_lis
     # all remaining NaN values to be converted to None (client is pure Python)
     # all specified keys to interpret their vals as Python lists (if not None)
     row_entries = selected.to_dict(orient='records')
-    if len(keyval_list) > 0: # necessary for json output as well
+    if len(keyval_list) > 0:
         for i in range(len(row_entries)): # row
             for key in keyval_list: # specified column (key)
                 if row_entries[i][key] != None: # null or list
@@ -73,10 +73,10 @@ class Board_Games_Details_List(Resource):
     @api.doc(description='Get all board games details')
     ###GET GAMES DETAILS###
     def get(self):
-        mm.increment('/board_games_details')
+        mm.increment('/details')
         conn = create_connection('Database')
         df = pd.read_sql_query("SELECT * FROM Details;", conn)
-        return get_json_entries(df)
+        return get_dict_entries(df)
 
     ###POST###
     @api.response(201, 'Board Game Details Added Successfully')
