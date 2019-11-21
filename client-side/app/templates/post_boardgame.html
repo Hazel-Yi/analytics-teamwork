@@ -75,6 +75,12 @@
         <form method="post" id="post_board_game">
           <table>
             <tr>
+              <td width="20%">ID</td>
+              <td>
+                <input name="id" type="text" placeholder="ID of the game" required="required">
+              </td>
+            </tr>
+            <tr>
               <td width="20%">NAME</td>
               <td>
                 <input name="name" type="text" placeholder="Name of the game" required="required">
@@ -87,15 +93,33 @@
               </td>
             </tr>
             <tr>
-              <td width="20%">IMAGE</td>
-              <td>
-                <input name="image" type="text" placeholder="Attach image of the game" required="required">
-              </td>
-            </tr>
-            <tr>
               <td width="20%">CATEGORIES</td>
               <td>
                 <input name="categories" type="text" placeholder="Categories of the game" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">MINIMUM #PLAYERS</td>
+              <td>
+                <input name="min_players" type="text" placeholder="Minimum number of players" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">MAXIMUM #PLAYERS</td>
+              <td>
+                <input name="max_players" type="text" placeholder="Maximum number of players" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">MINIMUM AGE</td>
+              <td>
+                <input name="min_age" type="text" placeholder="Minimum age of players" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">MINIMUM PLAYTIME</td>
+              <td>
+                <input name="min_playtime" type="text" placeholder="Minimum time of play" required="required">
               </td>
             </tr>
             <tr>
@@ -108,6 +132,24 @@
               <td width="20%">EXPANSIONS</td>
               <td>
                 <input name="expansions" type="text" placeholder="Expansions of the game" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">MECHANICS</td>
+              <td>
+                <input name="mechanics" type="text" placeholder="Mechanics of the game" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">THUMBNAIL</td>
+              <td>
+                <input name="thumbnail" type="text" placeholder="Thumbnail of the game image" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">YEAR PUBLISHED</td>
+              <td>
+                <input name="year" type="text" placeholder="Year game was published" required="required">
               </td>
             </tr>
           </table>

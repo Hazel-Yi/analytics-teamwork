@@ -68,15 +68,13 @@
             <th width="20%">YEAR</th>
           </tr>
 
-          <!--
-            make this part dynamic so it displays rows of games
-          -->
-
-          <tr>
-            <td>{{game_id}}</td>
-            <td>{{name}}</td>
-            <td>{{year}}</td>
-          </tr>
+          {% for ll in listlist %}
+            <tr>
+            {% for l in ll %}
+              <td>{{l}}</td>
+            {% endfor %}
+            </tr>
+          {% endfor %}
 
         </table>
       </article>
