@@ -203,7 +203,6 @@ class Board_Games_Details_List(Resource):
 @api.route('/details/<int:id>')
 @api.param('id', 'Game ID')
 class Board_Games(Resource):
-
     ###GET GAME DETAILS BY ID###
     @api.response(404, 'Game not found')
     @api.response(200, 'Successful')
@@ -221,11 +220,20 @@ class Board_Games(Resource):
         return details, 200
 
 
+@api.route('/details/top10')
+class Board_Games_Details_Top10List(Resource):
+    ###GET TOP 10 GAMES DETAILS###
+    @api.response(200, 'Successful')
+    @api.doc(description='Get Top 10 board games details')
+    def get(self):
+        mm.increment('/details/top10')
+        conn = create_connection('Database')
+        df = pd.read_sql_query("SELECT * FROM Details WHERE Board_Game_Rank != 'null' ORDER BY Board_Game_Rank LIMIT 10;", conn)
+        return get_dict_entries(df)
 
     
 @api.route('/reviews')
 class addReviews(Resource):
-
     ###POST REVIEW###
     @api.response(201, 'Review Added Successfully')
     @api.response(400, 'Validation Error')
