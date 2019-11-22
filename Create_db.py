@@ -27,7 +27,7 @@ def create_database(db_file):
 
 def create_table_reviews(dataframe, conn):
     #Index_2 integer,
-    create_table_Reviews = ('CREATE TABLE IF NOT EXISTS Reviews (Review_ID integer PRIMARY KEY, User text, Rating real, Comment text, Game_ID integer, Name text);')
+    create_table_Reviews = ('CREATE TABLE IF NOT EXISTS Reviews (Review_ID integer PRIMARY KEY, Game_ID integer, User text, Rating real, Comment text, Name text);')
     c = conn.cursor()
     print("Creating Table 'Reviews'...")
     try:
@@ -45,7 +45,7 @@ def create_table_reviews(dataframe, conn):
 
 
 def create_table_games(dataframe, conn):
-    create_table_Games = ('CREATE TABLE IF NOT EXISTS Games (ID integer, Name text, Year integer, Rank integer, Average real, Bayes_Average real, Users_Rated integer, URL text, Thumbnail text);')
+    create_table_Games = ('CREATE TABLE IF NOT EXISTS Games (Game_ID integer, Name text, Year integer, Rank integer, Average real, Bayes_Average real, Users_Rated integer, URL text, Thumbnail text);')
     c = conn.cursor()
     print("Creating Table 'Games'...")
     try:
@@ -55,14 +55,14 @@ def create_table_games(dataframe, conn):
         pass
     c.execute(create_table_Games)
     df = pd.read_csv(dataframe)
-    df.rename(columns ={'Bayes average':'Bayes_Average', 'Users rated':'Users_Rated'}, inplace=True)
-    df.set_index('ID', inplace=True)
+    df.rename(columns ={'ID':'Game_ID', 'Bayes average':'Bayes_Average', 'Users rated':'Users_Rated'}, inplace=True)
+    df.set_index('Game_ID', inplace=True)
     df.to_sql('Games', conn, if_exists='append', index=True)
     print("Done.")
 
 
 def create_table_details(dataframe, conn):
-    create_table_Details = ('CREATE TABLE IF NOT EXISTS Details (Detail_ID integer, Game_ID integer, Name text, Publisher text, Category text, Min_players integer, Max_players integer, Min_age integer, Min_playtime integer, Description text, Expansion text, Mechanic text, Thumbnail text, Year_Published integer);')
+    create_table_Details = ('CREATE TABLE IF NOT EXISTS Details (Detail_ID integer PRIMARY KEY, Game_ID integer, Name text, Publisher text, Category text, Min_players integer, Max_players integer, Min_age integer, Min_playtime integer, Description text, Expansion text, Mechanic text, Thumbnail text, Year_Published integer);')
     c = conn.cursor()
     print("Creating Table 'Details'...")
     try:
@@ -73,7 +73,6 @@ def create_table_details(dataframe, conn):
     c.execute(create_table_Details)
     df = pd.read_csv(dataframe)
     df.rename(columns ={
-            'Unnamed: 0': 'Detail_ID',
             'id': 'Game_ID',
             'primary': 'Name',
             'boardgamepublisher': 'Publisher',
@@ -89,7 +88,6 @@ def create_table_details(dataframe, conn):
             'yearpublished': 'Year_Published'
         }, inplace=True)
     df = df[[
-            'Detail_ID',
             'Game_ID',
             'Name',
             'Publisher',
@@ -103,8 +101,7 @@ def create_table_details(dataframe, conn):
             'Mechanic',
             'Thumbnail',
             'Year_Published']]
-    df.set_index('Detail_ID', inplace=True)
-    df.to_sql('Details', conn, if_exists='append', index=True)
+    df.to_sql('Details', conn, if_exists='append', index=True, index_label='Detail_ID')
     print("Done.")
 
 
@@ -116,5 +113,3 @@ if __name__ == '__main__':
     create_table_reviews(reviews_csv, conn)
     create_table_games(games_csv, conn)
     create_table_details(details_csv, conn)
-
-
