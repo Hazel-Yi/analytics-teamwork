@@ -55,7 +55,6 @@ review_model = api.model('Review', {
 })
 
 detail_model = api.model('Detail', {
-    'Game_ID': fields.Integer,
     'Name': fields.String,
     'Publisher': fields.List(fields.String),
     'Category': fields.List(fields.String),
@@ -95,40 +94,6 @@ class Board_Games_Details_List(Resource):
         df = pd.read_sql_query("SELECT * FROM Details;", conn)
         return get_dict_entries(df)
 
-    ###POST###
-    @api.response(201, 'Board Game Details Added Successfully')
-    @api.response(400, 'Validation Error')
-    @api.doc(description="Add new board game details")
-    @api.expect(detail_model, validate=True)
-    def post(self):
-        details = request.json
-        for key in details:
-            if key not in detail_model.keys():
-                return {"message": "Property {} is invalid".format(key)}, 400
-
-        conn = create_connection('Database')
-        df = pd.read_sql_query(
-            "SELECT Name FROM Details WHERE Game_ID = {};".format(details['Game_ID']), conn)
-        if len(df) > 0:
-            api.abort(400, "Game {} already exists".format(details['Game_ID']))
-        c = conn.cursor()
-        c.execute("INSERT INTO Details(Game_ID, Name, Publisher, Category, Min_players, Max_players, Min_age, Min_playtime, Description, Expansion, Mechanic, Thumbnail, Year_Published) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                  (details['Game_ID'],
-                   details['Name'],
-                   str(details['Publisher']),
-                   str(details['Category']),
-                   details['Min_players'],
-                   details['Max_players'],
-                   details['Min_age'],
-                   details['Min_playtime'],
-                   details['Description'],
-                   str(details['Expansion']),
-                   str(details['Mechanic']),
-                   details['Thumbnail'],
-                   details['Year_Published']))
-        conn.commit()
-        mm.increment('/board_games_details/POST {}'.format(id))
-        return {"message": "Game {} is created with ID {}".format(details['Name'], details['Game_ID'])}, 201
 
 ###GET API STATS###
 @api.route('/api_usage')
@@ -144,10 +109,11 @@ class Api_Usage(Resource):
 @api.route('/details/<int:id>')
 @api.param('id', 'Game ID')
 class Board_Games(Resource):
+          
+    ###GET GAME BY ID###
     @api.response(404, 'Game not found')
     @api.response(200, 'Successful')
     @api.doc(description="Get a game details by its ID")
-    ###GET GAME BY ID###
     def get(self, id):
         conn = create_connection('Database')
         df = pd.read_sql_query(
@@ -160,12 +126,47 @@ class Board_Games(Resource):
         mm.increment('/board_games_details/{}'.format(id))
         return details, 200
 
+    ###POST###
+    @api.response(201, 'Board Game Details Added Successfully')
+    @api.response(400, 'Validation Error')
+    @api.doc(description="Add new board game details")
+    @api.expect(detail_model, validate=True)
+    def post(self, id):
+        details = request.json
+        for key in details:
+            if key not in detail_model.keys():
+                return {"message": "Property {} is invalid".format(key)}, 400
+
+        conn = create_connection('Database')
+        df = pd.read_sql_query(
+            "SELECT Name FROM Details WHERE Game_ID = {};".format(id), conn)
+        if len(df) > 0:
+            api.abort(400, "Game {} already exists".format(id))
+        c = conn.cursor()
+        c.execute("INSERT INTO Details(Game_ID, Name, Publisher, Category, Min_players, Max_players, Min_age, Min_playtime, Description, Expansion, Mechanic, Thumbnail, Year_Published) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                  (id,
+                   details['Name'],
+                   str(details['Publisher']),
+                   str(details['Category']),
+                   details['Min_players'],
+                   details['Max_players'],
+                   details['Min_age'],
+                   details['Min_playtime'],
+                   details['Description'],
+                   str(details['Expansion']),
+                   str(details['Mechanic']),
+                   details['Thumbnail'],
+                   details['Year_Published']))
+        conn.commit()
+        mm.increment('/board_games_details/POST {}'.format(id))
+        return {"message": "Game {} is created with ID {}".format(details['Name'], id)}, 201
+
+    ###UPDATE###
     @api.response(404, 'Game not found')
     @api.response(400, 'Validation Error')
     @api.response(200, 'Successful')
     @api.expect(detail_model)
     @api.doc(description="Update a game details by its ID")
-    ###UPDATE###
     def put(self, id):
         details = request.json
         conn = create_connection('Database')
