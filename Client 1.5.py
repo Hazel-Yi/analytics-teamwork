@@ -170,9 +170,11 @@ class Board_Games(Resource):
         details = request.json
         conn = create_connection('Database')
         c = conn.cursor()
-        print("SELECT Detail_ID FROM Details WHERE Game_ID = {}".format(id))
+        #print("SELECT Detail_ID FROM Details WHERE Game_ID = {}".format(id))
         df = pd.read_sql_query(
             "SELECT Detail_ID FROM Details WHERE Game_ID = {}".format(id), conn)
+        if len(df) == 0:
+            api.abort(404, "Game {} doesn't exist".format(id))
         index = df.loc[0][0]
 
         for key in details:
