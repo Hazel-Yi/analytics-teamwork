@@ -6,7 +6,6 @@ from flask import Flask, request, jsonify
 from flask_restplus import Resource, Api, fields, inputs, abort
 from data_management import metadata_manager
 from Create_db import create_connection
-from itsdangerous import JSONWebSignatureSerializer as Serializer
 from auth import *
 
 
