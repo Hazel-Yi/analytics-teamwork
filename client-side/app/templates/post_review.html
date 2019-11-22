@@ -58,7 +58,7 @@
     
   <body>
     
-    <h1>RECOMMENDED BOARDGAMES</h1>
+    <h1>REVIEW A BOARDGAME</h1>
     
     <section>
       <nav>
@@ -74,32 +74,37 @@
       </nav>
 
       <article>
-        <form method="post">
-          <input name="search" type="text" placeholder="board_game_id" style="height: 30px;" required="required">
-          <input name="num_rec" type="text" placeholder="num_of_recommendations" style="height: 30px;" required="required">
-          <button type="submit">GET</button>
-        </form>
-
-        <!-- 
-            display table with {{ num_rec }} rows when user searches with an appropriate id
-        -->
-        <table>
-          <tr>
-            <th width="40%">IMAGE</th>
-            <th width="40%">NAME</th>
-            <th width="20%">YEAR</th>
-          </tr>
-  
-          <!--
-            make this part dynamic so it displays rows of games
-          -->
-          <tr>
-            <td>pic</td>
-            <td>Gloomhaven</td>
-            <td>2017</td>
-          </tr>
+        <form method="post" id="post_review">
+          <table>
+            <tr>
+              <td width="20%">ID</td>
+              <td>
+                <input name="id" type="text" placeholder="ID of the game" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">USERNAME</td>
+              <td>
+                <input name="username" type="text" placeholder="Your username" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">RATING</td>
+              <td>
+                <input name="rating" type="text" placeholder="Rate the game" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">COMMENTS</td>
+              <td>
+                <input name="comment" type="text" placeholder="Comments about the game" required="required">
+              </td>
+            </tr>
           </table>
+          <button type="submit" form="post_review">POST REVIEW</button>
+        </form>
       </article>
+
     </section>
     
   </body>

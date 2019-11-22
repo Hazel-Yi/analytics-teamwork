@@ -58,16 +58,18 @@
     
   <body>
     
-    <h1>POST /boardgame/</h1>
+    <h1>ADD A BOARDGAME</h1>
     
     <section>
       <nav>
         <ul>
-          <li><a href="{{ url_for('get_boardgame') }}">GET /boardgame/</a></li>
-          <li><a href="{{ url_for('get_boardgame_id') }}">GET /boardgame/id</a></li>
-          <li><a href="{{ url_for('get_rec') }}">GET /boardgame/id/rec?n=30</a></li>
-          <li><a href="{{ url_for('post_boardgame') }}">POST /boardgame/</a></li>
-          <li><a href="{{ url_for('put_boardgame') }}">PUT /boardgame/</a></li>
+          <li><a href="{{ url_for('get_boardgame') }}">All Boardgames</a></li>
+          <li><a href="{{ url_for('get_boardgame_id') }}">Find a Boardgame</a></li>
+          <li><a href="{{ url_for('post_boardgame') }}">Add a Boardgame</a></li>
+          <li><a href="{{ url_for('put_boardgame') }}">Update a Boardgame</a></li>
+          <li><a href="{{ url_for('get_review') }}">Find Reviews</a></li>
+          <li><a href="{{ url_for('post_review') }}">Add a Review</a></li>
+          <li><a href="{{ url_for('get_rec') }}">Recommended Boardgames</a></li>
         </ul>
       </nav>
 
