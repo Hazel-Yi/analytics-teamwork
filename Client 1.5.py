@@ -216,7 +216,7 @@ class addReviews(Resource):
 
         conn = create_connection('Database')
         df = pd.read_sql_query(
-            "SELECT Name FROM Games WHERE ID = {};".format(review['Game_ID']), conn)
+            "SELECT Name FROM Games WHERE Game_ID = {};".format(review['Game_ID']), conn)
         if len(df) == 0:
             api.abort(404, "Game {} doesn't exist".format(review['Game_ID']))
         Name = df.loc[0][0]
