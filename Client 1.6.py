@@ -58,14 +58,18 @@ review_model = api.model('Review', {
 detail_model = api.model('Detail', {
     'Game_ID': fields.Integer,
     'Name': fields.String,
+    'Board_Game_Rank': fields.Integer,
+    'Bayes_Average': fields.Float,
     'Publisher': fields.List(fields.String),
     'Category': fields.List(fields.String),
     'Min_players': fields.Integer,
     'Max_players': fields.Integer,
     'Min_age': fields.Integer,
     'Min_playtime': fields.Integer,
+    'Max_playtime': fields.Integer,
     'Description': fields.String,
     'Expansion': fields.List(fields.String),
+    'Board_Game_Family': fields.List(fields.String),
     'Mechanic': fields.List(fields.String),
     'Thumbnail': fields.Url,
     'Year_Published': fields.Integer
@@ -126,17 +130,21 @@ class Board_Games_Details_List(Resource):
         if len(df) > 0:
             api.abort(400, "Game {} already exists".format(details['Game_ID']))
         c = conn.cursor()
-        c.execute("INSERT INTO Details(Game_ID, Name, Publisher, Category, Min_players, Max_players, Min_age, Min_playtime, Description, Expansion, Mechanic, Thumbnail, Year_Published) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        c.execute("INSERT INTO Details(Game_ID, Name, Publisher, Board_Game_Rank, Bayes_Average, Category, Min_players, Max_players, Min_age, Min_playtime, Max_playtime, Description, Expansion, Board_Game_Family, Mechanic, Thumbnail, Year_Published) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                   (details['Game_ID'],
                    details['Name'],
+                   details['Board_Game_Rank'],
+                   str(details['Bayes_Average']),
                    str(details['Publisher']),
                    str(details['Category']),
                    details['Min_players'],
                    details['Max_players'],
                    details['Min_age'],
                    details['Min_playtime'],
+                   details['Max_playtime'],
                    details['Description'],
                    str(details['Expansion']),
+                   str(details['Board_Game_Family']),
                    str(details['Mechanic']),
                    details['Thumbnail'],
                    details['Year_Published']))
@@ -165,16 +173,20 @@ class Board_Games_Details_List(Resource):
             if key not in detail_model.keys():
                 return {"message": "Property {} is invalid".format(key)}, 400
 
-        c.execute('UPDATE Details SET Name=?, Publisher=?, Category=?, Min_players=?, Max_players=?, Min_age=?, Min_playtime=?, Description=?, Expansion=?, Mechanic=?, Thumbnail=?, Year_Published=? WHERE Detail_ID=?;', (
+        c.execute('UPDATE Details SET Name=?, Board_Game_Rank=?, Bayes_Average=?, Publisher=?, Category=?, Min_players=?, Max_players=?, Min_age=?, Min_playtime=?, Max_playtime=?, Description=?, Expansion=?, Board_Game_Family=?, Mechanic=?, Thumbnail=?, Year_Published=? WHERE Detail_ID=?;', (
             str(details['Name']),
+            str(details['Board_Game_Rank']),
+            str(details['Bayes_Average']),
             str(details['Publisher']),
             str(details['Category']),
             details['Min_players'],
             details['Max_players'],
             details['Min_age'],
             details['Min_playtime'],
+            details['Max_playtime'],
             str(details['Description']),
             str(details['Expansion']),
+            str(details['Board_Game_Family']),
             str(details['Mechanic']),
             str(details['Thumbnail']),
             details['Year_Published'],
@@ -258,7 +270,7 @@ class Reviews(Resource):
         df = pd.read_sql_query(
             "SELECT * FROM Reviews WHERE Game_ID = {};".format(id), conn)
         if len(df) == 0:
-            api.abort(404, "There are no reviews for {} doesn't exist".format(id))
+            api.abort(404, "Game {} has no reviews".format(id))
 
         mm.increment('/review/{}'.format(id))
         return get_dict_entries(df), 200
