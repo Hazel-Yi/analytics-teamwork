@@ -58,7 +58,7 @@
     
   <body>
     
-    <h1>RECOMMENDED BOARDGAMES</h1>
+    <h1>FIND REVIEWS ON A BOARDGAME</h1>
     
     <section>
       <nav>
@@ -76,10 +76,28 @@
       <article>
         <form method="post">
           <input name="search" type="text" placeholder="board_game_id" style="height: 30px;" required="required">
-          <input name="num_rec" type="text" placeholder="num_of_recommendations" style="height: 30px;" required="required">
-          <button type="submit">GET</button>
-        </form>
+          <button type="submit">VIEW REVIEWS</button>
+        </form> 
+        
+        <table>
+          <tr>
+            <th width="10%">ID</th>
+            <th width="20%">USERNAME</th>
+            <th width="20%">RATING</th>
+            <th width="50%">COMMENT</th>
+          </tr>
+
+          {% for ll in listlist %}
+            <tr>
+            {% for l in ll %}
+              <td>{{l}}</td>
+            {% endfor %}
+            </tr>
+          {% endfor %}
+
+        </table>  
       </article>
+
     </section>
     
   </body>

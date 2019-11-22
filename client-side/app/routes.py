@@ -9,8 +9,8 @@ def get_boardgame():
   r = requests.get("http://127.0.0.1:8000/details", params={'order': 'Game_ID', 'ascending':True})
   games = r.json()
 
-  testing = games[1]
-  '''print(testing)'''
+  '''testing = games[1]
+  print(testing)'''
 
   listlist = []
   game_id_list = []
@@ -36,7 +36,7 @@ def get_boardgame():
 
   '''print(listlist[0])'''
 
-  return render_template('get_boardgame.html', title='All Boardgames', listlist=listlist, game_id_list=game_id_list[0:10], name_list=name_list[0:10], year_list=year_list[0:10])
+  return render_template('get_boardgame.html', title='All Boardgames', listlist=listlist)
     
 
 @app.route('/get_boardgame_id', methods=['GET', 'POST'])
@@ -86,6 +86,7 @@ def post_boardgame():
     game = {
       'Game_ID': int(game_id),
       'Name': name,
+      'Board_Game_Rank': 0,
       'Publisher': published_by,
       'Category': categories,
       'Min_players': int(min_players),
@@ -149,10 +150,43 @@ def get_rec():
   else:
     return render_template('get_rec.html', title='Recommended Games')
 
-@app.route('/')
-@app.route('/get_review')
+@app.route('/get_review', methods=['GET', 'POST'])
 def get_review():
-  return render_template('get_review.html', title='Find Reviews')
+  if request.method == 'POST':
+    search_id = request.form['search']
+    print("searched for reviews with game id " + search_id) 
+    r = requests.get("http://127.0.0.1:8000/reviews/" + str(search_id))
+    reviews = r.json()
+
+    listlist = []
+    review_id_list = []
+    user_list = []
+    rating_list = []
+    comment_list = []
+
+    for review in reviews:
+      sublist = []
+      for key in review.keys():
+        if key == 'Review_ID':
+          review_id = str(review[key])
+          review_id_list.append(review_id)
+        if key == 'User':
+          user = str(review[key])
+          user_list.append(user)
+        if key == 'Rating':
+          rating = str(review[key])
+          rating_list.append(rating)  
+        if key == 'Comment':
+          comment = str(review[key])
+          comment_list.append(comment)  
+      sublist.append(review_id)
+      sublist.append(user)
+      sublist.append(rating)
+      sublist.append(comment)
+      listlist.append(sublist)
+    return render_template('get_review_2.html', title='Find Reviews', listlist=listlist)
+  else:
+    return render_template('get_review.html', title='Find Reviews')
 
 @app.route('/post_review', methods=['GET', 'POST'])
 def post_review():
