@@ -450,6 +450,8 @@ group by Year
 having max(Average)
 order by Year asc;'''
         df = pd.read_sql_query(sql, conn)
+        mm.increment('/details/top_yearly')
+        mm.save()
         return get_dict_entries(df)
 
 
@@ -471,11 +473,13 @@ class Trends_Yearly_Published(Resource):
 class Trends_Rating_Statistics(Resource):
     ###GET BOX PLOT OF RATINGS PER YEAR###
     @api.response(200, 'Successful')
-    @api.doc(description='Gets the min, max, median, 1st percentile, 3rd percentile and the average of all board game ratings for each year.')
+    @api.doc(description='Gets the min, max, median, 1st percentile, 3rd percentile, average and number of all board game ratings for each year. Years in BC will be negative.')
     def get(self):
         # cached from gen_review_stats.py due to compute time requirements
         with open('review_rating_quantiles.json','r') as f:
             stats = json.load(f)
+        mm.increment('/trends/rating_stats')
+        mm.save()
         return stats
 
 
@@ -551,7 +555,8 @@ class Recommendations(Resource):
                 result = result[result['boardgamecategory'].apply(lambda x: set(ast.literal_eval(x)).issuperset(set(values)) )]
         except:
             api.abort(400, 'Bad Request')
-
+        mm.increment('/recommendations/{}'.format(id))
+        mm.save()
         return get_dict_entries(result)
 
 # Returns a df with recommendations
@@ -578,6 +583,8 @@ class Token(Resource):
     @api.response(200, 'Successful')
     @api.doc(description="Get a token to access the end points")
     def get(self):
+        mm.increment('/auth')
+        mm.save()
         return {'token': auth.generate_token().decode()}, 200
 
 
