@@ -59,7 +59,7 @@ review_model = api.model('Review', {
 detail_model = api.model('Detail', {
     'Game_ID': fields.Integer,
     'Name': fields.String,
-    'Board_Game_Rank': fields.Integer,
+    'Board_Game_Rank': fields.String,
     'Bayes_Average': fields.Float,
     'Publisher': fields.List(fields.String),
     'Category': fields.List(fields.String),
@@ -137,8 +137,16 @@ class Board_Games_Details_List(Resource):
             api.abort(400, "Game '{}' already exists with Game_ID = {}".format(details['Name'], df.loc[0][0]))
         if not (details['Name']):
             api.abort(400, "Name field is missing")
-        if (details['Board_Game_Rank']) <= 0:
-            api.abort(400, "Rank can't be zero or negative")
+        details['Board_Game_Rank'] = details['Board_Game_Rank'].strip()
+        if not (details['Board_Game_Rank']):
+            pass
+        else:
+            try:
+                details['Board_Game_Rank'] = int(details['Board_Game_Rank'])
+                if details['Board_Game_Rank'] <= 0:
+                    api.abort(400, "Rank can't be zero or negative")
+            except Exception:
+                api.abort(400, "Invalid Rank")
         if (details['Bayes_Average']) < 0:
             api.abort(400, "Bayes Average can't be negative")
         if (details['Min_players'] > details['Max_players']):
@@ -203,8 +211,16 @@ class Board_Games_Details_List(Resource):
             api.abort(400, "Game '{}' already exists with Game_ID={}".format(details['Name'], df.loc[0][0]))
         if not (details['Name']):
             api.abort(400, "Name field is missing")
-        if (details['Board_Game_Rank']) <= 0:
-            api.abort(400, "Rank can't be zero or negative")
+        details['Board_Game_Rank'] = details['Board_Game_Rank'].strip()
+        if not (details['Board_Game_Rank']):
+            pass
+        else:
+            try:
+                details['Board_Game_Rank'] = int(details['Board_Game_Rank'])
+                if details['Board_Game_Rank'] <= 0:
+                    api.abort(400, "Rank can't be zero or negative")
+            except Exception:
+                api.abort(400, "Invalid Rank")
         if (details['Bayes_Average']) < 0:
             api.abort(400, "Bayes Average can't be negative")
         if (details['Min_players'] > details['Max_players']):
