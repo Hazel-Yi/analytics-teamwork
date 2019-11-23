@@ -60,7 +60,7 @@ detail_model = api.model('Detail', {
     'Game_ID': fields.Integer,
     'Name': fields.String,
     'Board_Game_Rank': fields.String,
-    'Bayes_Average': fields.Float,
+    #'Bayes_Average': fields.Float,
     'Publisher': fields.List(fields.String),
     'Category': fields.List(fields.String),
     'Min_players': fields.Integer,
@@ -148,8 +148,8 @@ class Board_Games_Details_List(Resource):
                     api.abort(400, "Rank can't be zero or negative")
             except Exception:
                 api.abort(400, "Invalid Rank")
-        if (details['Bayes_Average']) < 0:
-            api.abort(400, "Bayes Average can't be negative")
+        #if (details['Bayes_Average']) < 0:
+            #api.abort(400, "Bayes Average can't be negative")
         if (details['Min_players'] > details['Max_players']):
             api.abort(400, "Maximum players can't be less than Minimum players")
         if (details['Min_players'] <= 0 or details['Max_players'] <= 0):
@@ -166,11 +166,11 @@ class Board_Games_Details_List(Resource):
             details['Thumbnail'] = 'https://via.placeholder.com/150x150?text=No+Image'
 
         c = conn.cursor()
-        c.execute("INSERT INTO Details(Game_ID, Name, Board_Game_Rank, Bayes_Average, Publisher, Category, Min_players, Max_players, Min_age, Min_playtime, Max_playtime, Description, Expansion, Board_Game_Family, Mechanic, Thumbnail, Year_Published) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        c.execute("INSERT INTO Details(Game_ID, Name, Board_Game_Rank, Publisher, Category, Min_players, Max_players, Min_age, Min_playtime, Max_playtime, Description, Expansion, Board_Game_Family, Mechanic, Thumbnail, Year_Published) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                   (details['Game_ID'],
                    details['Name'],
                    details['Board_Game_Rank'],
-                   str(details['Bayes_Average']),
+                   #str(details['Bayes_Average']),
                    str(details['Publisher']),
                    str(details['Category']),
                    details['Min_players'],
@@ -223,8 +223,8 @@ class Board_Games_Details_List(Resource):
                     api.abort(400, "Rank can't be zero or negative")
             except Exception:
                 api.abort(400, "Invalid Rank")
-        if (details['Bayes_Average']) < 0:
-            api.abort(400, "Bayes Average can't be negative")
+        #if (details['Bayes_Average']) < 0:
+            #api.abort(400, "Bayes Average can't be negative")
         if (details['Min_players'] > details['Max_players']):
             api.abort(400, "Maximum players can't be less than Minimum players")
         if (details['Min_players'] <= 0 or details['Max_players'] <= 0):
@@ -245,10 +245,10 @@ class Board_Games_Details_List(Resource):
                 return {"message": "Property {} is invalid".format(key)}, 400
 
         c = conn.cursor()
-        c.execute('UPDATE Details SET Name=?, Board_Game_Rank=?, Bayes_Average=?, Publisher=?, Category=?, Min_players=?, Max_players=?, Min_age=?, Min_playtime=?, Max_playtime=?, Description=?, Expansion=?, Board_Game_Family=?, Mechanic=?, Thumbnail=?, Year_Published=? WHERE Detail_ID=?;', (
+        c.execute('UPDATE Details SET Name=?, Board_Game_Rank=?, Publisher=?, Category=?, Min_players=?, Max_players=?, Min_age=?, Min_playtime=?, Max_playtime=?, Description=?, Expansion=?, Board_Game_Family=?, Mechanic=?, Thumbnail=?, Year_Published=? WHERE Detail_ID=?;', (
             str(details['Name']),
             str(details['Board_Game_Rank']),
-            str(details['Bayes_Average']),
+            #str(details['Bayes_Average']),
             str(details['Publisher']),
             str(details['Category']),
             details['Min_players'],
@@ -478,18 +478,3 @@ class Token(Resource):
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8000, debug=True)
 
-
-    # conn = create_connection('Database')
-    # df = pd.read_sql_query("SELECT Rating FROM Reviews WHERE Rating = 1;", conn)
-    # if len(df) == 0:
-    #     print("Game 200 doesn't exist")
-    # print(df)
-    # Name = df.loc[0][0]
-    # if not os.path.exists('recommendations.json'):
-    #     print("Recommendations file doesn't exist")
-    # with open('recommendations.json') as json_file:
-    #     #json_string = json.dumps(json_file)
-    #     rec = json.load(json_file)
-    # if Name not in rec:
-    #     print("No recommendations found for {}".format(Name))
-    # print(rec[Name])
