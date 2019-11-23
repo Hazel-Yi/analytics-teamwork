@@ -119,15 +119,17 @@
         <table>
           <tr>
             <th width="40%">ID</th>
-            <th width="40%">NAME</th>
+            <th width="20%">NAME</th>
+            <th width="20%">IMAGE</th>
             <th width="20%">YEAR</th>
           </tr>
 
           {% for ll in listlist %}
             <tr>
-            {% for l in ll %}
-              <td>{{l}}</td>
-            {% endfor %}
+              <td>{{ll.ID}}</td>
+              <td>{{ll.Name}}</td>
+              <td><img style="display:block" width=100% src={{ll.Thumbnail}}></td>
+              <td>{{ll.Year_Published}}</td>
             </tr>
           {% endfor %}
 

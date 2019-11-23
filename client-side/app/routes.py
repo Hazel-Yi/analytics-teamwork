@@ -13,10 +13,6 @@ def get_top10():
   print(testing)'''
 
   listlist = []
-  game_id_list = []
-  name_list = []
-  year_list = []
-  image_list = []
 
   for game in games:
     # sublist = []
@@ -45,28 +41,22 @@ def get_boardgame():
   print(testing)'''
 
   listlist = []
-  game_id_list = []
-  name_list = []
-  year_list = []
+
 
   for game in games:
-    sublist = []
+    game_item = {}
     for key in game.keys():
       if key == 'Game_ID':
-        game_id = str(game[key])
-        game_id_list.append(game_id)
+        game_item['ID'] = str(game[key])
       if key == 'Name':
-        name = str(game[key])
-        name_list.append(name)
+        game_item['Name'] = str(game[key])
       if key == 'Year_Published':
-        year = str(game[key])
-        year_list.append(year)  
-    sublist.append(game_id)
-    sublist.append(name)
-    sublist.append(year)
-    listlist.append(sublist)
+        game_item[key] = str(game[key])
+      if key =='Thumbnail':
+        game_item[key] = str(game[key])
 
-  '''print(listlist[0])'''
+    listlist.append(game_item)
+
 
   return render_template('get_boardgame.html', title='All Boardgames', listlist=listlist)
     
@@ -89,7 +79,6 @@ def get_boardgame_id():
         description = str(game[key])
       if key == 'Expansion':
         expansions = str(game[key])
-    '''print(name)'''
     return render_template('get_boardgame_id_2.html', title='Find Boardgame', name=name, published_by=published_by, categories=categories, description=description, expansions=expansions)
   else:
     return render_template('get_boardgame_id.html', title='Find Boardgame')
