@@ -386,19 +386,42 @@ class Board_Games_Details_Top10List(Resource):
         return get_dict_entries(df)
 
 
+# doesn't use the Games table since none of the endpoints use that table either
+# def get_game_averages(conn):
+#     df = pd.read_sql_query("select Game_ID, avg(Rating) as Average, count(*) as Num_Reviews from Reviews group by Game_ID order by Average desc limit 4", 
+#                            conn, index_col='Game_ID')
+#     return df.to_dict(orient='index')
+
+# too difficult to implement by year AND by category as the db is not properly relational
+@api.route('/details/top_yearly')
+class Board_Games_Details_TopYearlyGame(Resource):
+    ###GET TOP GAME OF EACH YEAR###
+    @api.response(200, 'Successful')
+    @api.doc(description='Get the top-rated game for each year, alongside its ID, name, average score, and number of reviews counted. Years in BC will be negative.')
+    def get(self):
+        conn = create_connection('Database')
+        sql = '''
+select *
+from (select Game_ID, Name, Year_Published as Year from Details) natural join 
+     (select Game_ID, avg(Rating) as Average, count(*) as Num_Reviews from Reviews group by Game_ID) 
+group by Year
+having max(Average)
+order by Year asc;'''
+        df = pd.read_sql_query(sql, conn)
+        return get_dict_entries(df)
+
+
 @api.route('/trends/num_published')
-class Board_Games_Details_Top10List(Resource):
+class Trends_Yearly_Published(Resource):
     ###GET NUMBER OF GAMES PUBLISHED PER YEAR###
     @api.response(200, 'Successful')
-    @api.doc(description='Get the number of game publications that were made for each year. Years in BC will be negative.')
+    @api.doc(description='Get the number of game publications per year. Years in BC will be negative.')
     def get(self):
         conn = create_connection('Database')
         df = pd.read_sql_query("select Year_Published as Year, count(*) as Number_Published from Details group by Year_Published order by Year_Published;", conn)
         mm.increment('/trends/num_published')
         mm.save()
         return get_dict_entries(df)
-
-
 
 
 #########################################################################
