@@ -466,7 +466,6 @@ class Trends_Yearly_Published(Resource):
         mm.save()
         return get_dict_entries(df)
 
-<<<<<<< HEAD
 
 @api.route('/trends/rating_stats')
 class Trends_Rating_Statistics(Resource):
@@ -480,8 +479,6 @@ class Trends_Rating_Statistics(Resource):
         return stats
 
 
-=======
->>>>>>> 86bc48a5f833b776fa0b9095066249c89858706f
 #########################################################################
 ###GET GAME RECOMMENDATIONS###
 # Get recommendations by name
