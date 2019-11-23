@@ -62,7 +62,7 @@ def create_table_games(dataframe, conn):
 
 
 def create_table_details(dataframe, conn):
-    create_table_Details = ('CREATE TABLE IF NOT EXISTS Details (Detail_ID integer PRIMARY KEY, Game_ID integer, Name text, Board_Game_Rank integer, Bayes_Average real, Publisher text, Category text, Min_players integer, Max_players integer, Min_age integer, Min_playtime integer, Max_playtime integer, Description text, Expansion text, Board_Game_Family text, Mechanic text, Thumbnail text, Year_Published integer);')
+    create_table_Details = ('CREATE TABLE IF NOT EXISTS Details (Detail_ID integer PRIMARY KEY, Game_ID integer, Name text, Board_Game_Rank integer, Publisher text, Category text, Min_players integer, Max_players integer, Min_age integer, Min_playtime integer, Max_playtime integer, Description text, Expansion text, Board_Game_Family text, Mechanic text, Thumbnail text, Year_Published integer);')
     c = conn.cursor()
     print("Creating Table 'Details'...")
     try:
@@ -76,7 +76,7 @@ def create_table_details(dataframe, conn):
             'id': 'Game_ID',
             'primary': 'Name',
             'Board Game Rank': 'Board_Game_Rank',
-            'bayesaverage': 'Bayes_Average',
+            #'bayesaverage': 'Bayes_Average',
             'boardgamepublisher': 'Publisher',
             'boardgamecategory': 'Category',
             'minplayers': 'Min_players',
@@ -95,7 +95,7 @@ def create_table_details(dataframe, conn):
             'Game_ID',
             'Name',
             'Board_Game_Rank',
-            'Bayes_Average',
+            #'Bayes_Average',
             'Publisher',
             'Category',
             'Min_players',
@@ -109,6 +109,7 @@ def create_table_details(dataframe, conn):
             'Mechanic',
             'Thumbnail',
             'Year_Published']]
+    #df.set_index('Detail_ID', inplace=True)
     df.to_sql('Details', conn, if_exists='append', index=True, index_label='Detail_ID')
     print("Done.")
 

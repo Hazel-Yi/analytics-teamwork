@@ -14,7 +14,6 @@ from auth import *
 import numpy as np
 
 
-
 app = Flask(__name__)
 api = Api(app, version='1.5', default="Board Game Geek",
           title="Board Game Geek Dataset", description="...",
@@ -63,7 +62,7 @@ detail_model = api.model('Detail', {
     'Game_ID': fields.Integer,
     'Name': fields.String,
     'Board_Game_Rank': fields.String,
-    'Bayes_Average': fields.Float,
+    #'Bayes_Average': fields.Float,
     'Publisher': fields.List(fields.String),
     'Category': fields.List(fields.String),
     'Min_players': fields.Integer,
@@ -89,6 +88,19 @@ game_model = api.model('Game', {
     'Users_Rated': fields.Integer,
     'URL': fields.Url,
     'Thumbnail': fields.Url
+})
+
+# Model structure for ML game recommendation
+game_suggestion = api.model('GameSuggestion', {
+    'Game_ID': fields.Integer,
+    'Name': fields.Integer,
+    'Category': fields.List(fields.String),
+    'Min_players': fields.Integer,
+    'Max_players': fields.Integer,
+    'Min_age': fields.Integer,
+    'Min_playtime': fields.Integer,
+    'Max_playtime': fields.Integer,
+    'Year_Published': fields.Integer
 })
 
 
@@ -155,8 +167,8 @@ class Board_Games_Details_List(Resource):
                     api.abort(400, "Rank can't be zero or negative")
             except Exception:
                 api.abort(400, "Invalid Rank")
-        if (details['Bayes_Average']) < 0:
-            api.abort(400, "Bayes Average can't be negative")
+        #if (details['Bayes_Average']) < 0:
+            #api.abort(400, "Bayes Average can't be negative")
         if (details['Min_players'] > details['Max_players']):
             api.abort(400, "Maximum players can't be less than Minimum players")
         if (details['Min_players'] <= 0 or details['Max_players'] <= 0):
@@ -175,11 +187,11 @@ class Board_Games_Details_List(Resource):
             details['Thumbnail'] = 'https://via.placeholder.com/150x150?text=No+Image'
 
         c = conn.cursor()
-        c.execute("INSERT INTO Details(Game_ID, Name, Board_Game_Rank, Bayes_Average, Publisher, Category, Min_players, Max_players, Min_age, Min_playtime, Max_playtime, Description, Expansion, Board_Game_Family, Mechanic, Thumbnail, Year_Published) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        c.execute("INSERT INTO Details(Game_ID, Name, Board_Game_Rank, Publisher, Category, Min_players, Max_players, Min_age, Min_playtime, Max_playtime, Description, Expansion, Board_Game_Family, Mechanic, Thumbnail, Year_Published) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                   (details['Game_ID'],
                    details['Name'],
                    details['Board_Game_Rank'],
-                   str(details['Bayes_Average']),
+                   #str(details['Bayes_Average']),
                    str(details['Publisher']),
                    str(details['Category']),
                    details['Min_players'],
@@ -232,8 +244,8 @@ class Board_Games_Details_List(Resource):
                     api.abort(400, "Rank can't be zero or negative")
             except Exception:
                 api.abort(400, "Invalid Rank")
-        if (details['Bayes_Average']) < 0:
-            api.abort(400, "Bayes Average can't be negative")
+        #if (details['Bayes_Average']) < 0:
+            #api.abort(400, "Bayes Average can't be negative")
         if (details['Min_players'] > details['Max_players']):
             api.abort(400, "Maximum players can't be less than Minimum players")
         if (details['Min_players'] <= 0 or details['Max_players'] <= 0):
@@ -254,10 +266,10 @@ class Board_Games_Details_List(Resource):
                 return {"message": "Property {} is invalid".format(key)}, 400
 
         c = conn.cursor()
-        c.execute('UPDATE Details SET Name=?, Board_Game_Rank=?, Bayes_Average=?, Publisher=?, Category=?, Min_players=?, Max_players=?, Min_age=?, Min_playtime=?, Max_playtime=?, Description=?, Expansion=?, Board_Game_Family=?, Mechanic=?, Thumbnail=?, Year_Published=? WHERE Detail_ID=?;', (
+        c.execute('UPDATE Details SET Name=?, Board_Game_Rank=?, Publisher=?, Category=?, Min_players=?, Max_players=?, Min_age=?, Min_playtime=?, Max_playtime=?, Description=?, Expansion=?, Board_Game_Family=?, Mechanic=?, Thumbnail=?, Year_Published=? WHERE Detail_ID=?;', (
             str(details['Name']),
             str(details['Board_Game_Rank']),
-            str(details['Bayes_Average']),
+            #str(details['Bayes_Average']),
             str(details['Publisher']),
             str(details['Category']),
             details['Min_players'],
@@ -416,11 +428,36 @@ class Board_Games_Details_Top10List(Resource):
         return get_dict_entries(df)
 
 
+# doesn't use the Games table since none of the endpoints use that table either
+# def get_game_averages(conn):
+#     df = pd.read_sql_query("select Game_ID, avg(Rating) as Average, count(*) as Num_Reviews from Reviews group by Game_ID order by Average desc limit 4", 
+#                            conn, index_col='Game_ID')
+#     return df.to_dict(orient='index')
+
+# too difficult to implement by year AND by category as the db is not properly relational
+@api.route('/details/top_yearly')
+class Board_Games_Details_TopYearlyGame(Resource):
+    ###GET TOP GAME OF EACH YEAR###
+    @api.response(200, 'Successful')
+    @api.doc(description='Get the top-rated game for each year, alongside its ID, name, average score, and number of reviews counted. Years in BC will be negative.')
+    def get(self):
+        conn = create_connection('Database')
+        sql = '''
+select *
+from (select Game_ID, Name, Year_Published as Year from Details) natural join 
+     (select Game_ID, avg(Rating) as Average, count(*) as Num_Reviews from Reviews group by Game_ID) 
+group by Year
+having max(Average)
+order by Year asc;'''
+        df = pd.read_sql_query(sql, conn)
+        return get_dict_entries(df)
+
+
 @api.route('/trends/num_published')
-class Board_Games_Details_Top10List(Resource):
+class Trends_Yearly_Published(Resource):
     ###GET NUMBER OF GAMES PUBLISHED PER YEAR###
     @api.response(200, 'Successful')
-    @api.doc(description='Get the number of game publications that were made for each year. Years in BC will be negative.')
+    @api.doc(description='Get the number of game publications per year. Years in BC will be negative.')
     def get(self):
         conn = create_connection('Database')
         df = pd.read_sql_query(
@@ -428,19 +465,6 @@ class Board_Games_Details_Top10List(Resource):
         mm.increment('/trends/num_published')
         mm.save()
         return get_dict_entries(df)
-
-# Model structure for ML game recommendation
-game_suggestion = api.model('GameSuggestion', {
-    'Game_ID': fields.Integer,
-    'Name': fields.Integer,
-    'Category': fields.List(fields.String),
-    'Min_players': fields.Integer,
-    'Max_players': fields.Integer,
-    'Min_age': fields.Integer,
-    'Min_playtime': fields.Integer,
-    'Max_playtime': fields.Integer,
-    'Year_Published': fields.Integer
-})
 
 #########################################################################
 ###GET GAME RECOMMENDATIONS###
