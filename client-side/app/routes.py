@@ -28,7 +28,7 @@ def get_top10():
         name_list.append(name)
       if key == 'Year_Published':
         year = str(game[key])
-        year_list.append(year)  
+        year_list.append(year) 
     sublist.append(game_id)
     sublist.append(name)
     sublist.append(year)
@@ -103,16 +103,21 @@ def post_boardgame():
     categories = []
     expansions = []
     mechanics = []
+    board_game_family = []
+
     game_id = request.form['id']
     name = request.form['name']
+    rank = ""
     published_by.append(request.form['published_by'])
     categories.append(request.form['categories'])
     min_players = request.form['min_players']
     max_players = request.form['max_players']
     min_age = request.form['min_age']
     min_playtime = request.form['min_playtime']
+    max_playtime = request.form['max_playtime']
     description = request.form['description']
     expansions.append(request.form['expansions'])
+    board_game_family.append(request.form['board_game_family'])
     mechanics.append(request.form['mechanics'])
     thumbnail = request.form['thumbnail']
     year = request.form['year']
@@ -120,22 +125,33 @@ def post_boardgame():
     game = {
       'Game_ID': int(game_id),
       'Name': name,
-      'Board_Game_Rank': 0,
+      'Board_Game_Rank': rank,
       'Publisher': published_by,
       'Category': categories,
       'Min_players': int(min_players),
       'Max_players': int(max_players),
       'Min_age': int(min_age),
       'Min_playtime': int(min_playtime),
+      'Max_playtime': int(max_playtime),
       'Description': description,
       'Expansion': expansions,
+      'Board_Game_Family': board_game_family,
       'Mechanic': mechanics,
       'Thumbnail': thumbnail,
       'Year_Published': int(year)
     }
-    '''print(game)'''
+    print(game)
+
+    auth = requests.get("http://127.0.0.1:8000/auth")
+    token = auth.json()
+
+    print(token)
+    for key in token.keys():
+      t = str(token[key])
+      
+    print(t)
     
-    r = requests.post("http://127.0.0.1:8000/details", json=game)
+    r = requests.post("http://127.0.0.1:8000/details", json=game, headers={'AUTH-TOKEN': t})
 
     print("Status Code:" + str(r.status_code))
     resp = r.json()
@@ -151,6 +167,7 @@ def put_boardgame():
     categories = []
     expansions = []
     mechanics = []
+    board_game_family = []
     game_id = request.form['id']
     name = request.form['name']
     published_by.append(request.form['published_by'])
@@ -159,8 +176,10 @@ def put_boardgame():
     max_players = request.form['max_players']
     min_age = request.form['min_age']
     min_playtime = request.form['min_playtime']
+    max_playtime = request.form['max_playtime']
     description = request.form['description']
     expansions.append(request.form['expansions'])
+    board_game_family.append(request.form['board_game_family'])
     mechanics.append(request.form['mechanics'])
     thumbnail = request.form['thumbnail']
     year = request.form['year']
@@ -174,14 +193,16 @@ def put_boardgame():
       'Max_players': int(max_players),
       'Min_age': int(min_age),
       'Min_playtime': int(min_playtime),
+      'Max_playtime': int(max_playtime),
       'Description': description,
       'Expansion': expansions,
+      'Board_Game_Family': board_game_family,
       'Mechanic': mechanics,
       'Thumbnail': thumbnail,
       'Year_Published': int(year)
     }
 
-    r = requests.get("http://127.0.0.1:8000/details/" + str(game_id))
+    r = requests.get("http://127.0.0.1:8s000/details/" + str(game_id))
     searched_game = r.json()
 
     for key in searched_game.keys():
@@ -195,9 +216,18 @@ def put_boardgame():
 
     print(game)
 
+    auth = requests.get("http://127.0.0.1:8000/auth")
+    token = auth.json()
+
+    print(token)
+    for key in token.keys():
+      t = str(token[key])
+      
+    print(t)
+
     '''print(searched_game)
 
-    r = requests.put("http://127.0.0.1:8000/details/" + str(game_id))
+    r = requests.put("http://127.0.0.1:8000/details/" + str(game_id), headers={'AUTH-TOKEN': t})
     game = r.json()
     print(game)'''
 
