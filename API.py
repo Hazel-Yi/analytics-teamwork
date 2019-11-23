@@ -122,14 +122,32 @@ class Api_Usage(Resource):
 class Board_Games_Details_List(Resource):
     ###GET GAMES DETAILS###
     @api.response(200, 'Successful')
-    @api.doc(description='Get all board games details')
+    @api.doc(
+        description='Get all board games details',
+        params={
+            'Page': 'Specify page number, default is the first page',
+            'PageElements': 'Number of elements to return per page, default is 20' 
+        }
+    )
     # Chunk this to be loaded onto multiple pages
     def get(self):
+        details = request.json
+        print(details)
+        page_number = 1
+        page_elements = 20
+
+        index_list = range( (page_number - 1)* page_elements, (page_number)*page_elements, 1) 
+        if details is not None:
+            if 'Page' in details:
+                page_number = details['Page']
+            if 'PageElements' in details:
+                page_elements = details['PageElements']
+
         conn = create_connection('Database')
         df = pd.read_sql_query("SELECT * FROM Details;", conn)
         mm.increment('/details')
         mm.save()
-        return get_dict_entries(df), 200
+        return get_dict_entries(df.iloc[index_list]), 200
 
     ###POST GAME DETAILS###
     @api.response(201, 'Board Game Details Added Successfully')
@@ -507,7 +525,7 @@ class Recommendations(Resource):
         })
     def get(self, id):
         details = request.args
-        print(details)
+        # print(details)
 
         conn = create_connection('Database')
         df = pd.read_sql_query(
