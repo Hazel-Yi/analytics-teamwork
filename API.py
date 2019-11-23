@@ -88,7 +88,7 @@ game_model = api.model('Game', {
     'Thumbnail': fields.Url
 })
 
-
+#########################################################################
 ###GET API STATS###
 @api.route('/api_usage')
 class Api_Usage(Resource):
@@ -101,7 +101,7 @@ class Api_Usage(Resource):
         return api_usage, 200
 
 
-
+#########################################################################
 @api.route('/details')
 class Board_Games_Details_List(Resource):
     ###GET GAMES DETAILS###
@@ -297,7 +297,7 @@ class Board_Games_Year(Resource):
         return get_dict_entries(df), 200
 
 
-
+#########################################################################
 @api.route('/reviews')
 class addReviews(Resource):
     ###POST REVIEW###
@@ -354,7 +354,7 @@ class Reviews(Resource):
         mm.save()
         return get_dict_entries(df), 200
 
-
+#########################################################################
 @api.route('/details/top10')                                                                                            # can be changed to include the number of top games the user wants /details/top/{int}
 class Board_Games_Details_Top10List(Resource):
     ###GET TOP 10 GAMES DETAILS###
@@ -368,6 +368,22 @@ class Board_Games_Details_Top10List(Resource):
         return get_dict_entries(df)
 
 
+@api.route('/trends/num_published')
+class Board_Games_Details_Top10List(Resource):
+    ###GET NUMBER OF GAMES PUBLISHED PER YEAR###
+    @api.response(200, 'Successful')
+    @api.doc(description='Get the number of game publications that were made for each year. Years in BC will be negative.')
+    def get(self):
+        conn = create_connection('Database')
+        df = pd.read_sql_query("select Year_Published as Year, count(*) as Number_Published from Details group by Year_Published order by Year_Published;", conn)
+        mm.increment('/trends/num_published')
+        mm.save()
+        return get_dict_entries(df)
+
+
+
+
+#########################################################################
 ###GET GAME RECOMMENDATIONS###
 @api.route('/recommendations/<int:id>')
 @api.param('id', 'Game ID')
@@ -391,7 +407,7 @@ class Recommendations(Resource):
         mm.save()
         return rec[Name]    
 
-
+#########################################################################
 @api.route('/auth')
 class Token(Resource):
     @api.response(200, 'Successful')
@@ -399,7 +415,7 @@ class Token(Resource):
     def get(self):
         return {'token': auth.generate_token().decode()}, 200
 
-
+#########################################################################
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8000, debug=True)
 
