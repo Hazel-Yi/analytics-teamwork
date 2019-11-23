@@ -521,7 +521,8 @@ class Recommendations(Resource):
             'Min_playtime': 'Minimum playtime',
             'Max_playtime': 'Maximum playtime',
             'Min_Year_Published': 'Min Year Published',
-            'Max_Year_Published': 'Max Year Published'
+            'Max_Year_Published': 'Max Year Published',
+            'N': 'Number of results to return'
         })
     def get(self, id):
         details = request.args
@@ -571,6 +572,10 @@ class Recommendations(Resource):
                 values = ast.literal_eval(details['Category'])
                 result['boardgamecategory'] = result['boardgamecategory'].replace(np.nan, '[]')
                 result = result[result['boardgamecategory'].apply(lambda x: set(ast.literal_eval(x)).issuperset(set(values)) )]
+            if 'N' in details:
+                value = int(details['N'])
+                print(value)
+                result = result.head(value)
         except:
             api.abort(400, 'Bad Request')
         mm.increment('/recommendations/{}'.format(id))
