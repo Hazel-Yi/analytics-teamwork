@@ -1,3 +1,4 @@
+import ast
 import sqlite3
 import json
 import os
@@ -10,6 +11,7 @@ from data_management import metadata_manager
 from Create_db import create_connection
 #from itsdangerous import JSONWebSignatureSerializer as Serializer
 from auth import *
+import numpy as np
 
 
 app = Flask(__name__)
@@ -60,7 +62,7 @@ detail_model = api.model('Detail', {
     'Game_ID': fields.Integer,
     'Name': fields.String,
     'Board_Game_Rank': fields.String,
-    'Bayes_Average': fields.Float,
+    #'Bayes_Average': fields.Float,
     'Publisher': fields.List(fields.String),
     'Category': fields.List(fields.String),
     'Min_players': fields.Integer,
@@ -88,6 +90,20 @@ game_model = api.model('Game', {
     'Thumbnail': fields.Url
 })
 
+# Model structure for ML game recommendation
+game_suggestion = api.model('GameSuggestion', {
+    'Game_ID': fields.Integer,
+    'Name': fields.Integer,
+    'Category': fields.List(fields.String),
+    'Min_players': fields.Integer,
+    'Max_players': fields.Integer,
+    'Min_age': fields.Integer,
+    'Min_playtime': fields.Integer,
+    'Max_playtime': fields.Integer,
+    'Year_Published': fields.Integer
+})
+
+
 #########################################################################
 ###GET API STATS###
 @api.route('/api_usage')
@@ -107,7 +123,8 @@ class Board_Games_Details_List(Resource):
     ###GET GAMES DETAILS###
     @api.response(200, 'Successful')
     @api.doc(description='Get all board games details')
-    def get(self):                                                    # Chunk this to be loaded onto multiple pages
+    # Chunk this to be loaded onto multiple pages
+    def get(self):
         conn = create_connection('Database')
         df = pd.read_sql_query("SELECT * FROM Details;", conn)
         mm.increment('/details')
@@ -131,11 +148,13 @@ class Board_Games_Details_List(Resource):
         df = pd.read_sql_query(
             "SELECT Name FROM Details WHERE Game_ID = ?;", conn, params=[details['Game_ID']])                            # Check if the Game_ID already exists
         if len(df) > 0:
-            api.abort(400, "Game_ID {} already exists with Name '{}'".format(details['Game_ID'], df.loc[0][0]))
+            api.abort(400, "Game_ID {} already exists with Name '{}'".format(
+                details['Game_ID'], df.loc[0][0]))
         df = pd.read_sql_query(
             "SELECT Game_ID FROM Details WHERE Name = ?;", conn, params=[details['Name']])                             # Check if there is another game with the same Name
         if len(df) > 0:
-            api.abort(400, "Game '{}' already exists with Game_ID = {}".format(details['Name'], df.loc[0][0]))
+            api.abort(400, "Game '{}' already exists with Game_ID = {}".format(
+                details['Name'], df.loc[0][0]))
         if not (details['Name']):
             api.abort(400, "Name field is missing")
         details['Board_Game_Rank'] = details['Board_Game_Rank'].strip()
@@ -148,8 +167,8 @@ class Board_Games_Details_List(Resource):
                     api.abort(400, "Rank can't be zero or negative")
             except Exception:
                 api.abort(400, "Invalid Rank")
-        if (details['Bayes_Average']) < 0:
-            api.abort(400, "Bayes Average can't be negative")
+        #if (details['Bayes_Average']) < 0:
+            #api.abort(400, "Bayes Average can't be negative")
         if (details['Min_players'] > details['Max_players']):
             api.abort(400, "Maximum players can't be less than Minimum players")
         if (details['Min_players'] <= 0 or details['Max_players'] <= 0):
@@ -160,17 +179,19 @@ class Board_Games_Details_List(Resource):
             api.abort(400, "Playtime can't be negative")
         if (details['Min_playtime'] > details['Max_playtime']):
             api.abort(400, "Maximum playtime can't be less than Minimum playtime")
-        if (details['Year_Published'] > datetime.now().year):                                     # There are some games that have Year_Published = 2020
-            api.abort(400, "Invalid Publishing Year")                                             # (maybe upcoming games, or someone invented a time machine. this condition may change)
+        # There are some games that have Year_Published = 2020
+        if (details['Year_Published'] > datetime.now().year):
+            # (maybe upcoming games, or someone invented a time machine. this condition may change)
+            api.abort(400, "Invalid Publishing Year")
         if not (details['Thumbnail']):
             details['Thumbnail'] = 'https://via.placeholder.com/150x150?text=No+Image'
 
         c = conn.cursor()
-        c.execute("INSERT INTO Details(Game_ID, Name, Board_Game_Rank, Bayes_Average, Publisher, Category, Min_players, Max_players, Min_age, Min_playtime, Max_playtime, Description, Expansion, Board_Game_Family, Mechanic, Thumbnail, Year_Published) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        c.execute("INSERT INTO Details(Game_ID, Name, Board_Game_Rank, Publisher, Category, Min_players, Max_players, Min_age, Min_playtime, Max_playtime, Description, Expansion, Board_Game_Family, Mechanic, Thumbnail, Year_Published) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                   (details['Game_ID'],
                    details['Name'],
                    details['Board_Game_Rank'],
-                   str(details['Bayes_Average']),
+                   #str(details['Bayes_Average']),
                    str(details['Publisher']),
                    str(details['Category']),
                    details['Min_players'],
@@ -189,7 +210,6 @@ class Board_Games_Details_List(Resource):
         mm.save()
         return {"message": "Game {} is created with ID {}".format(details['Name'], details['Game_ID'])}, 201
 
-
     ###UPDATE GAME DETAILS###
     @api.response(404, 'Game not found')
     @api.response(400, 'Validation Error')
@@ -200,7 +220,7 @@ class Board_Games_Details_List(Resource):
     def put(self):
         details = request.json
         conn = create_connection('Database')
-        
+
         df = pd.read_sql_query(
             "SELECT Detail_ID FROM Details WHERE Game_ID = ?", conn, params=[details['Game_ID']])                        # Check if the game exists (Can't update a game that doesn't exist)
         if len(df) == 0:
@@ -210,7 +230,8 @@ class Board_Games_Details_List(Resource):
         df = pd.read_sql_query(
             "SELECT Game_ID FROM Details WHERE Name = ?;", conn, params=[details['Name']])                             # Check if there is another game with the same updated Name
         if len(df) > 0:
-            api.abort(400, "Game '{}' already exists with Game_ID={}".format(details['Name'], df.loc[0][0]))
+            api.abort(400, "Game '{}' already exists with Game_ID={}".format(
+                details['Name'], df.loc[0][0]))
         if not (details['Name']):
             api.abort(400, "Name field is missing")
         details['Board_Game_Rank'] = details['Board_Game_Rank'].strip()
@@ -223,8 +244,8 @@ class Board_Games_Details_List(Resource):
                     api.abort(400, "Rank can't be zero or negative")
             except Exception:
                 api.abort(400, "Invalid Rank")
-        if (details['Bayes_Average']) < 0:
-            api.abort(400, "Bayes Average can't be negative")
+        #if (details['Bayes_Average']) < 0:
+            #api.abort(400, "Bayes Average can't be negative")
         if (details['Min_players'] > details['Max_players']):
             api.abort(400, "Maximum players can't be less than Minimum players")
         if (details['Min_players'] <= 0 or details['Max_players'] <= 0):
@@ -245,10 +266,10 @@ class Board_Games_Details_List(Resource):
                 return {"message": "Property {} is invalid".format(key)}, 400
 
         c = conn.cursor()
-        c.execute('UPDATE Details SET Name=?, Board_Game_Rank=?, Bayes_Average=?, Publisher=?, Category=?, Min_players=?, Max_players=?, Min_age=?, Min_playtime=?, Max_playtime=?, Description=?, Expansion=?, Board_Game_Family=?, Mechanic=?, Thumbnail=?, Year_Published=? WHERE Detail_ID=?;', (
+        c.execute('UPDATE Details SET Name=?, Board_Game_Rank=?, Publisher=?, Category=?, Min_players=?, Max_players=?, Min_age=?, Min_playtime=?, Max_playtime=?, Description=?, Expansion=?, Board_Game_Family=?, Mechanic=?, Thumbnail=?, Year_Published=? WHERE Detail_ID=?;', (
             str(details['Name']),
             str(details['Board_Game_Rank']),
-            str(details['Bayes_Average']),
+            #str(details['Bayes_Average']),
             str(details['Publisher']),
             str(details['Category']),
             details['Min_players'],
@@ -269,6 +290,7 @@ class Board_Games_Details_List(Resource):
         mm.save()
 
         return {"message": "Game {} has been successfully updated".format(details['Game_ID'])}, 200
+
 
 @api.route('/details/<int:id>')
 @api.param('id', 'Game ID')
@@ -301,7 +323,7 @@ class Board_Games_Name(Resource):
     def get(self, name):
         conn = create_connection('Database')
         df = pd.read_sql_query(
-            "SELECT * FROM Details WHERE Name LIKE ?;", conn, params=['%' + name + '%'])                  
+            "SELECT * FROM Details WHERE Name LIKE ?;", conn, params=['%' + name + '%'])
         if len(df) == 0:
             api.abort(404, "No Match Found - {}".format(name))
         mm.increment('/board_games_details/{}'.format(name))
@@ -391,14 +413,16 @@ class Reviews(Resource):
         return get_dict_entries(df), 200
 
 #########################################################################
-@api.route('/details/top10')                                                                                            # can be changed to include the number of top games the user wants /details/top/{int}
+# can be changed to include the number of top games the user wants /details/top/{int}
+@api.route('/details/top10')
 class Board_Games_Details_Top10List(Resource):
     ###GET TOP 10 GAMES DETAILS###
     @api.response(200, 'Successful')
     @api.doc(description='Get Top 10 board games details')
     def get(self):
         conn = create_connection('Database')
-        df = pd.read_sql_query("SELECT * FROM Details WHERE Board_Game_Rank != 'null' AND Board_Game_Rank > 0 ORDER BY Board_Game_Rank LIMIT 10;", conn)
+        df = pd.read_sql_query(
+            "SELECT * FROM Details WHERE Board_Game_Rank != 'null' AND Board_Game_Rank > 0 ORDER BY Board_Game_Rank LIMIT 10;", conn)
         mm.increment('/details/top10')
         mm.save()
         return get_dict_entries(df)
@@ -436,11 +460,13 @@ class Trends_Yearly_Published(Resource):
     @api.doc(description='Get the number of game publications per year. Years in BC will be negative.')
     def get(self):
         conn = create_connection('Database')
-        df = pd.read_sql_query("select Year_Published as Year, count(*) as Number_Published from Details group by Year_Published order by Year_Published;", conn)
+        df = pd.read_sql_query(
+            "select Year_Published as Year, count(*) as Number_Published from Details group by Year_Published order by Year_Published;", conn)
         mm.increment('/trends/num_published')
         mm.save()
         return get_dict_entries(df)
 
+<<<<<<< HEAD
 
 @api.route('/trends/rating_stats')
 class Trends_Rating_Statistics(Resource):
@@ -454,29 +480,100 @@ class Trends_Rating_Statistics(Resource):
         return stats
 
 
+=======
+>>>>>>> 86bc48a5f833b776fa0b9095066249c89858706f
 #########################################################################
 ###GET GAME RECOMMENDATIONS###
+# Get recommendations by name
 @api.route('/recommendations/<int:id>')
 @api.param('id', 'Game ID')
 class Recommendations(Resource):
     @api.response(200, 'Successful')
     @api.response(404, 'No Recommendations Found')
-    @api.doc(description="Get recommendations for a specific game")
+    # @api.expect(game_suggestion)
+    @api.doc(
+        description="Get recommendations for a specific game",
+        params={
+            'Name': "Name of the Board Game",
+            'Category': "List of board game categories",
+            'Min_players': 'Minimum number of players',
+            'Max_players': 'Maximum number of players',
+            'Min_age': 'Minimum recommended age',
+            'Min_playtime': 'Minimum playtime',
+            'Max_playtime': 'Maximum playtime',
+            'Min_Year_Published': 'Min Year Published',
+            'Max_Year_Published': 'Max Year Published'
+        })
     def get(self, id):
+        details = request.args
+        print(details)
+
         conn = create_connection('Database')
-        df = pd.read_sql_query("SELECT Name FROM Details WHERE Game_ID = ?;", conn, params=[id])
+        df = pd.read_sql_query(
+            "SELECT Name FROM Details WHERE Game_ID = ?;", conn, params=[id])
         if len(df) == 0:
             api.abort(404, "Game {} doesn't exist".format(id))
-        Name = df.loc[0][0]
+        name = df.loc[0][0]
+
+
+        # Get reviews
+        # Open recommendations
         if not os.path.exists('recommendations.json'):
             api.abort(404, "Recommendations file doesn't exist")
-        with open('recommendations.json') as json_file:
-            rec = json.load(json_file)
-        if Name not in rec:
-            api.abort(404, "No recommendations found for {}".format(Name))
-        mm.increment('/recommendations/{}'.format(id))
-        mm.save()
-        return rec[Name]    
+
+        # Get list of recommendations
+        try:
+            result = getRecommendationByName(name)
+        except KeyError:
+            print('KEY ERROR')
+            api.abort(404, "Name was not found")
+        # print(result)
+        # Do series of filters
+        try:
+            if 'Min_Year_Published' in details:
+                value = int(details['Min_Year_Published'])
+                result = result[result['yearpublished'] >= value]
+            if 'Max_Year_Published' in details:
+                value = int(details['Max_Year_Published'])
+                result = result[result['yearpublished'] <= value]
+            if 'Min_players' in details:
+                value = int(details['Min_players'])
+                result = result[result["minplayers"] >= value]
+            if 'Max_players' in details:
+                value = int(details['Max_players'])
+                result = result[result["maxplayers"] <= value]
+            if 'Min_playtime' in details:
+                value = int(details['Min_playtime'])
+                result = result[result["minplaytime"] >= value]
+            if 'Max_playtime' in details:
+                value = int(details['Max_playtime'])
+                result = result[result["maxplaytime"] <= value]
+            if 'Category' in details:
+                values = ast.literal_eval(details['Category'])
+                result['boardgamecategory'] = result['boardgamecategory'].replace(np.nan, '[]')
+                result = result[result['boardgamecategory'].apply(lambda x: set(ast.literal_eval(x)).issuperset(set(values)) )]
+        except:
+            api.abort(400, 'Bad Request')
+
+        return get_dict_entries(result)
+
+# Returns a df with recommendations
+def getRecommendationByName(name):
+    with open('recommendations.json') as json_data:
+        games = json.load(json_data)
+    json_data.close()
+
+    games = games[name]
+    # print(games)
+
+    details = pd.read_csv("2019-05-02.csv")
+    top200 = details[details['Name'].isin(games)]
+    top200 = top200[["ID","Name"]]
+    player_detail = pd.read_csv("games_detailed_info.csv")
+    df = pd.merge(left=player_detail,right=top200,left_on='id',right_on='ID')
+    df = df[["ID","Name","boardgamepublisher","boardgamecategory","minplayers","maxplayers","minplaytime","maxplaytime","minage","description","boardgameexpansion","boardgamemechanic","thumbnail","yearpublished"]]
+    return df
+    
 
 #########################################################################
 @api.route('/auth')
@@ -486,10 +583,10 @@ class Token(Resource):
     def get(self):
         return {'token': auth.generate_token().decode()}, 200
 
+
 #########################################################################
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8000, debug=True)
-
 
     # conn = create_connection('Database')
     # df = pd.read_sql_query("SELECT Rating FROM Reviews WHERE Rating = 1;", conn)

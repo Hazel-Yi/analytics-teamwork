@@ -54,13 +54,53 @@
         background-color: #FDF5E6;
         padding: 10px;
       }
+      h1 { 
+        font-family: Candara; 
+        font-size: 24px; 
+        font-style: normal; 
+        font-variant: normal; 
+        font-weight: bold; 
+        line-height: 26px; 
+      }
+      h3 { 
+        font-family: Candara, Calibri, Segoe, "Segoe UI", Optima, Arial, sans-serif; 
+        font-size: 14px; 
+        font-style: normal; 
+        font-variant: normal; 
+        font-weight: bold; 
+        line-height: 15px; 
+      } 
+      p { 
+        font-family: Candara, Calibri, Segoe, "Segoe UI", Optima, Arial, sans-serif; 
+        font-size: 14px; 
+        font-style: normal; 
+        font-variant: normal; 
+        font-weight: 400; 
+        line-height: 20px; 
+      } 
+      blockquote { 
+        font-family: Candara, Calibri, Segoe, "Segoe UI", Optima, Arial, sans-serif; 
+        font-size: 21px; 
+        font-style: normal; 
+        font-variant: normal; 
+        font-weight: 400; 
+        line-height: 30px; 
+      } 
+      pre { 
+        font-family: Candara, Calibri, Segoe, "Segoe UI", Optima, Arial, sans-serif; 
+        font-size: 13px; 
+        font-style: normal; 
+        font-variant: normal; 
+        font-weight: 400; 
+        line-height: 18px; 
+      }
     </style>
   </head>
     
   <body>
-    
+    <br>
     <h1>ADD A BOARDGAME</h1>
-    
+    <br>
     <section>
       <nav>
         <ul>
@@ -127,6 +167,12 @@
               </td>
             </tr>
             <tr>
+              <td width="20%">MAXIMUM PLAYTIME</td>
+              <td>
+                <input name="max_playtime" type="text" placeholder="Maximum time of play" required="required">
+              </td>
+            </tr>
+            <tr>
               <td width="20%">DESCRIPTION</td>
               <td>
                 <input name="description" type="text" placeholder="Desription of the game" required="required">
@@ -136,6 +182,12 @@
               <td width="20%">EXPANSIONS</td>
               <td>
                 <input name="expansions" type="text" placeholder="Expansions of the game" required="required">
+              </td>
+            </tr>
+            <tr>
+              <td width="20%">BOARDGAME FAMILY</td>
+              <td>
+                <input name="board_game_family" type="text" placeholder="Family the board game belongs to" required="required">
               </td>
             </tr>
             <tr>
