@@ -320,3 +320,34 @@ def post_review():
 
     print(resp['message'])
   return render_template('post_review.html', title='Add a Review')
+
+@app.route('/num_published')
+def num_published():
+  r = requests.get("http://127.0.0.1:8000/trends/num_published")
+  trends = r.json()
+  trends_subset = trends[-10:]
+
+  print(trends_subset)
+
+  year_list = []
+  num_list = []
+  listlist = []
+
+  for trend in trends_subset:
+    sublist = []
+    for key in trend.keys():
+      if key == 'Year':
+        year = int(trend[key])
+        year_list.append(year)
+      if key == 'Number_Published':
+        num = int(trend[key])
+        num_list.append(num)
+    sublist.append(year)
+    sublist.append(num)
+    listlist.append(sublist)
+ 
+  print(year_list)
+  print(num_list)
+  print(listlist)
+
+  return render_template('get_trends_num_published.html', title='Trends', listlist=listlist)

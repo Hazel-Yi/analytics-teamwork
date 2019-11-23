@@ -113,6 +113,7 @@
           <li><a href="{{ url_for('get_review') }}">Find Reviews</a></li>
           <li><a href="{{ url_for('post_review') }}">Add a Review</a></li>
           <li><a href="{{ url_for('get_rec') }}">Recommended Boardgames</a></li>
+          <li><a href="{{ url_for('num_published') }}">Trends</a></li>
         </ul>
       </nav>
 
@@ -120,18 +121,18 @@
           {{ pagination.links }}
         <table>
           <tr>
-            <th width="40%">ID</th>
+            <th width="20%">ID</th>
             <th width="20%">NAME</th>
-            <th width="20%">IMAGE</th>
             <th width="20%">YEAR</th>
+            <th width="40%">IMAGE</th>
           </tr>
 
           {% for ll in listlist %}
             <tr>
               <td>{{ll.ID}}</td>
               <td>{{ll.Name}}</td>
-              <td><img style="display:block" width=100% src={{ll.Thumbnail}}></td>
               <td>{{ll.Year_Published}}</td>
+              <td><img style="display:block" width=100% src={{ll.Thumbnail}}></td>
             </tr>
           {% endfor %}
 
