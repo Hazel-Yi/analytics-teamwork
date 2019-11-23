@@ -112,7 +112,7 @@ class Board_Games_Details_List(Resource):
         df = pd.read_sql_query("SELECT * FROM Details;", conn)
         mm.increment('/details')
         mm.save()
-        return get_dict_entries(df)
+        return get_dict_entries(df), 200
 
     ###POST GAME DETAILS###
     @api.response(201, 'Board Game Details Added Successfully')
@@ -289,6 +289,24 @@ class Board_Games(Resource):
         mm.increment('/board_games_details/{}'.format(id))
         mm.save()
         return details, 200
+
+
+@api.route('/details/<string:name>')
+@api.param('name', 'Game Name')
+class Board_Games_Name(Resource):
+    ###GET GAME DETAILS BY NAME###
+    @api.response(404, 'Game not found')
+    @api.response(200, 'Successful')
+    @api.doc(description="Get a game details by its name")
+    def get(self, name):
+        conn = create_connection('Database')
+        df = pd.read_sql_query(
+            "SELECT * FROM Details WHERE Name LIKE ?;", conn, params=['%' + name + '%'])                  # here needs fixing at '%?%'
+        if len(df) == 0:
+            api.abort(404, "No Match Found - {}".format(name))
+        mm.increment('/board_games_details/{}'.format(name))
+        mm.save()
+        return get_dict_entries(df), 200
 
 
 @api.route('/details/year/<string:year>')
