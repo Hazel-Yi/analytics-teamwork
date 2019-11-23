@@ -16,23 +16,21 @@ def get_top10():
   game_id_list = []
   name_list = []
   year_list = []
+  image_list = []
 
   for game in games:
-    sublist = []
+    # sublist = []
+    game_item = {}
     for key in game.keys():
       if key == 'Game_ID':
-        game_id = str(game[key])
-        game_id_list.append(game_id)
+        game_item['ID'] = str(game[key])
       if key == 'Name':
-        name = str(game[key])
-        name_list.append(name)
+        game_item['Name'] = str(game[key])
       if key == 'Year_Published':
-        year = str(game[key])
-        year_list.append(year) 
-    sublist.append(game_id)
-    sublist.append(name)
-    sublist.append(year)
-    listlist.append(sublist)
+        game_item[key] = str(game[key])
+      if key =='Thumbnail':
+        game_item[key] = str(game[key])
+    listlist.append(game_item)
 
   '''print(listlist[0])'''
 
