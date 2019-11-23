@@ -442,6 +442,18 @@ class Trends_Yearly_Published(Resource):
         return get_dict_entries(df)
 
 
+@api.route('/trends/rating_stats')
+class Trends_Rating_Statistics(Resource):
+    ###GET BOX PLOT OF RATINGS PER YEAR###
+    @api.response(200, 'Successful')
+    @api.doc(description='Gets the min, max, median, 1st percentile, 3rd percentile and the average of all board game ratings for each year.')
+    def get(self):
+        # cached from gen_review_stats.py due to compute time requirements
+        with open('review_rating_quantiles.json','r') as f:
+            stats = json.load(f)
+        return stats
+
+
 #########################################################################
 ###GET GAME RECOMMENDATIONS###
 @api.route('/recommendations/<int:id>')
