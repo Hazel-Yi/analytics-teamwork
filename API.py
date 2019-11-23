@@ -301,7 +301,7 @@ class Board_Games_Name(Resource):
     def get(self, name):
         conn = create_connection('Database')
         df = pd.read_sql_query(
-            "SELECT * FROM Details WHERE Name LIKE ?;", conn, params=['%' + name + '%'])                  # here needs fixing at '%?%'
+            "SELECT * FROM Details WHERE Name LIKE ?;", conn, params=['%' + name + '%'])                  
         if len(df) == 0:
             api.abort(404, "No Match Found - {}".format(name))
         mm.increment('/board_games_details/{}'.format(name))
