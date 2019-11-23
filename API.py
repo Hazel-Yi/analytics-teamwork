@@ -535,7 +535,7 @@ class Recommendations(Resource):
             if 'Category' in details:
                 values = ast.literal_eval(details['Category'])
                 result['boardgamecategory'] = result['boardgamecategory'].replace(np.nan, '[]')
-                result = result[result['boardgamecategory'].apply(lambda x: all(elem in values for elem in ast.literal_eval(x)) )]
+                result = result[result['boardgamecategory'].apply(lambda x: set(ast.literal_eval(x)).issuperset(set(values)) )]
         except:
             api.abort(400, 'Bad Request')
 
