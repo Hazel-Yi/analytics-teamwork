@@ -91,17 +91,29 @@ game_model = api.model('Game', {
 })
 
 # Model structure for ML game recommendation
-game_suggestion = api.model('GameSuggestion', {
-    'Game_ID': fields.Integer,
-    'Name': fields.Integer,
-    'Category': fields.List(fields.String),
-    'Min_players': fields.Integer,
-    'Max_players': fields.Integer,
-    'Min_age': fields.Integer,
-    'Min_playtime': fields.Integer,
-    'Max_playtime': fields.Integer,
-    'Year_Published': fields.Integer
-})
+# game_suggestion = api.model('GameSuggestion', {
+#     'Game_ID': fields.Integer(required=True),
+#     #'Name': fields.String,
+#     'Category': fields.List(fields.String),
+#     'Min_players': fields.Integer,
+#     'Max_players': fields.Integer,
+#     'Min_age': fields.Integer,
+#     'Min_playtime': fields.Integer,
+#     'Max_playtime': fields.Integer,
+#     'Year_Published': fields.Integer,
+#     'N': fields.Integer
+# })
+
+# game_suggestion_by_name = api.model('GameSuggestionByName', {
+#     'Name': fields.String(required=True),
+#     # 'Category': fields.List(fields.String),
+#     # 'Min_players': fields.Integer,
+#     # 'Max_players': fields.Integer,
+#     # 'Min_age': fields.Integer,
+#     # 'Min_playtime': fields.Integer,
+#     # 'Max_playtime': fields.Integer,
+#     # 'Year_Published': fields.Integer
+# })
 
 
 #########################################################################
@@ -503,27 +515,23 @@ class Trends_Rating_Statistics(Resource):
 
 #########################################################################
 ###GET GAME RECOMMENDATIONS###
-# Get recommendations by name
+# Get recommendations by id
 @api.route('/recommendations/<int:id>')
 @api.param('id', 'Game ID')
+@api.param('N', 'Number of results to return', type='int')
+@api.param('Max_Year_Published', 'Max Year Published', type='int')
+@api.param('Min_Year_Published', 'Min Year Published', type='int')
+@api.param('Max_playtime', 'Maximum playtime', type='int')
+@api.param('Min_playtime', 'Minimum playtime', type='int')
+@api.param('Min_age', 'Minimum recommended age', type='int')
+@api.param('Max_players', 'Maximum number of players', type='int')
+@api.param('Min_players', 'Minimum number of players', type='int')
+@api.param('Category', "List of board game categories", type='list[string]')  # reqparse is deprecated, don't want mashmallow
 class Recommendations(Resource):
     @api.response(200, 'Successful')
     @api.response(404, 'No Recommendations Found')
-    # @api.expect(game_suggestion)
-    @api.doc(
-        description="Get recommendations for a specific game",
-        params={
-            #'Name': "Name of the Board Game",
-            'Category': "List of board game categories",
-            'Min_players': 'Minimum number of players',
-            'Max_players': 'Maximum number of players',
-            'Min_age': 'Minimum recommended age',
-            'Min_playtime': 'Minimum playtime',
-            'Max_playtime': 'Maximum playtime',
-            'Min_Year_Published': 'Min Year Published',
-            'Max_Year_Published': 'Max Year Published',
-            'N': 'Number of results to return'
-        })
+    #@api.expect(game_suggestion)
+    @api.doc(description="Get recommendations for a specific game")
     def get(self, id):
         details = request.args
         # print(details)
@@ -534,7 +542,6 @@ class Recommendations(Resource):
         if len(df) == 0:
             api.abort(404, "Game {} doesn't exist".format(id))
         name = df.loc[0][0]
-
 
         # Get reviews
         # Open recommendations
@@ -550,40 +557,54 @@ class Recommendations(Resource):
         # print(result)
         # Do series of filters
         try:
-            if 'Min_Year_Published' in details:
-                value = int(details['Min_Year_Published'])
-                result = result[result['yearpublished'] >= value]
-            if 'Max_Year_Published' in details:
-                value = int(details['Max_Year_Published'])
-                result = result[result['yearpublished'] <= value]
-            if 'Min_players' in details:
-                value = int(details['Min_players'])
-                result = result[result["minplayers"] >= value]
-            if 'Max_players' in details:
-                value = int(details['Max_players'])
-                result = result[result["maxplayers"] <= value]
-            if 'Min_playtime' in details:
-                value = int(details['Min_playtime'])
-                result = result[result["minplaytime"] >= value]
-            if 'Max_playtime' in details:
-                value = int(details['Max_playtime'])
-                result = result[result["maxplaytime"] <= value]
-            if 'Category' in details:
-                values = ast.literal_eval(details['Category'])
-                result['boardgamecategory'] = result['boardgamecategory'].replace(np.nan, '[]')
-                result = result[result['boardgamecategory'].apply(lambda x: set(ast.literal_eval(x)).issuperset(set(values)) )]
-            if 'Min_age' in details:
-                value = int(details['Min_age'])
-                result = result[result["minage"] >= value]
-            if 'N' in details:
-                value = int(details['N'])
-                print(value)
-                result = result.head(value)
+            result = filterRecommendations(details, result)
         except:
             api.abort(400, 'Bad Request')
         mm.increment('/recommendations/{}'.format(id))
         mm.save()
         return get_dict_entries(result)
+
+
+# Get recommendations by name
+@api.route('/recommendations')
+@api.param('Name', 'Name of the Board Game', type='string', required=True)
+@api.param('N', 'Number of results to return', type='int')
+@api.param('Max_Year_Published', 'Max Year Published', type='int')
+@api.param('Min_Year_Published', 'Min Year Published', type='int')
+@api.param('Max_playtime', 'Maximum playtime', type='int')
+@api.param('Min_playtime', 'Minimum playtime', type='int')
+@api.param('Min_age', 'Minimum recommended age', type='int')
+@api.param('Max_players', 'Maximum number of players', type='int')
+@api.param('Min_players', 'Minimum number of players', type='int')
+@api.param('Category', "List of board game categories", type='list[string]')  # reqparse is deprecated, don't want mashmallow
+class RecommendationsByName(Resource):
+    @api.response(200, 'Successful')
+    @api.response(404, 'No Recommendations Found')
+    #@api.expect(game_suggestion_by_name)
+    @api.doc(description="Get recommendations for a specific game")
+    def get(self):
+        details = request.args
+        # Get reviews
+        # Open recommendations
+        if not os.path.exists('recommendations.json'):
+            api.abort(404, "Recommendations file doesn't exist")
+
+        # Get list of recommendations
+        try:
+            result = getRecommendationByName(details['Name']) # safe
+        except KeyError as e:
+            print('KEY ERROR:', e)
+            api.abort(404, "Name was not found")
+        # print(result)
+        # Do series of filters
+        try:
+            result = filterRecommendations(details, result)
+        except:
+            api.abort(400, 'Bad Request')
+        mm.increment('/recommendations')
+        mm.save()
+        return get_dict_entries(result)
+
 
 # Returns a df with recommendations
 def getRecommendationByName(name):
@@ -604,6 +625,7 @@ def getRecommendationByName(name):
                   'Min_playtime', 'Max_playtime', 'Min_age', 'Description', 'Expansion',
                   'Mechanic', 'Thumbnail', 'Year_Published']
     df = df[categories]
+    df['Thumbnail'] = df['Thumbnail'].fillna('https://via.placeholder.com/150x150?text=No+Image')
     # to make compatible with old legacy code
     compat_categories = ["ID","Name","boardgamepublisher","boardgamecategory","minplayers",
                          "maxplayers","minplaytime","maxplaytime","minage","description",
@@ -611,6 +633,40 @@ def getRecommendationByName(name):
     df.columns = compat_categories
     return df
     
+# details: from the Resource, not from the db
+# result: from getRecommendationByName()
+def filterRecommendations(details, result):
+    if 'Min_Year_Published' in details:
+        value = int(details['Min_Year_Published'])
+        result = result[result['yearpublished'] >= value]
+    if 'Max_Year_Published' in details:
+        value = int(details['Max_Year_Published'])
+        result = result[result['yearpublished'] <= value]
+    if 'Min_players' in details:
+        value = int(details['Min_players'])
+        result = result[result["minplayers"] >= value]
+    if 'Max_players' in details:
+        value = int(details['Max_players'])
+        result = result[result["maxplayers"] <= value]
+    if 'Min_playtime' in details:
+        value = int(details['Min_playtime'])
+        result = result[result["minplaytime"] >= value]
+    if 'Max_playtime' in details:
+        value = int(details['Max_playtime'])
+        result = result[result["maxplaytime"] <= value]
+    if 'Category' in details:
+        values = ast.literal_eval(details['Category'])
+        result['boardgamecategory'] = result['boardgamecategory'].replace(np.nan, '[]')
+        result = result[result['boardgamecategory'].apply(lambda x: set(ast.literal_eval(x)).issuperset(set(values)) )]
+    if 'Min_age' in details:
+        value = int(details['Min_age'])
+        result = result[result["minage"] >= value]
+    if 'N' in details:
+        value = int(details['N'])
+        print(value)
+        result = result.head(value)
+    return result
+
 
 #########################################################################
 @api.route('/auth')
