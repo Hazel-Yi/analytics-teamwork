@@ -165,11 +165,41 @@ def put_boardgame():
     thumbnail = request.form['thumbnail']
     year = request.form['year']
     
+    game = {
+      'Game_ID': int(game_id),
+      'Name': name,
+      'Publisher': published_by,
+      'Category': categories,
+      'Min_players': int(min_players),
+      'Max_players': int(max_players),
+      'Min_age': int(min_age),
+      'Min_playtime': int(min_playtime),
+      'Description': description,
+      'Expansion': expansions,
+      'Mechanic': mechanics,
+      'Thumbnail': thumbnail,
+      'Year_Published': int(year)
+    }
+
+    r = requests.get("http://127.0.0.1:8000/details/" + str(game_id))
+    searched_game = r.json()
+
+    for key in searched_game.keys():
+      if key == 'Name':
+        if str(searched_game[key]) == name:
+          print("okay")
+        else:
+          print("not okay")
+
     print("searched for a game with id " + game_id)
+
+    print(game)
+
+    '''print(searched_game)
 
     r = requests.put("http://127.0.0.1:8000/details/" + str(game_id))
     game = r.json()
-    print(game)
+    print(game)'''
 
   return render_template('put_boardgame.html', title='Update a Boardgame')
 
@@ -178,9 +208,16 @@ def get_rec():
   '''get 30 recommended games provided by the ML model'''
   if request.method == 'POST':
     search_id = request.form['search']
-    num_rec = request.form['num_rec']
-    print("searched for a game with id " + search_id + " and " + num_rec + " number of rec")
-    return render_template('get_rec_2.html', title='Recommended Games', num_rec=num_rec) 
+    num_rec = int(request.form['num_rec'])
+
+    r = requests.get("http://127.0.0.1:8000/recommendations/" + str(search_id))
+    games = r.json()
+
+    rec = games[0:num_rec]
+
+    '''print(games[0])'''
+
+    return render_template('get_rec_2.html', title='Recommended Games', rec=rec, num_rec=num_rec) 
   else:
     return render_template('get_rec.html', title='Recommended Games')
 

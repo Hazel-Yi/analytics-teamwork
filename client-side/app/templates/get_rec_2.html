@@ -79,7 +79,7 @@
         <form method="post">
           <input name="search" type="text" placeholder="board_game_id" style="height: 30px;" required="required">
           <input name="num_rec" type="text" placeholder="num_of_recommendations" style="height: 30px;" required="required">
-          <button type="submit">GET</button>
+          <button type="submit">RECOMMEND GAMES</button>
         </form>
 
         <!-- 
@@ -87,19 +87,17 @@
         -->
         <table>
           <tr>
-            <th width="40%">IMAGE</th>
             <th width="40%">NAME</th>
-            <th width="20%">YEAR</th>
           </tr>
   
           <!--
             make this part dynamic so it displays rows of games
           -->
-          <tr>
-            <td>pic</td>
-            <td>Gloomhaven</td>
-            <td>2017</td>
-          </tr>
+          {% for r in rec %}
+            <tr>
+              <td>{{r}}</td>
+            </tr>
+          {% endfor %}
           </table>
       </article>
     </section>
