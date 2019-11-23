@@ -128,11 +128,11 @@ class Board_Games_Details_List(Resource):
         conn = create_connection('Database')
 
         df = pd.read_sql_query(
-            "SELECT Name FROM Details WHERE Game_ID = {};".format(details['Game_ID']), conn)                            # Check if the Game_ID already exists
+            "SELECT Name FROM Details WHERE Game_ID = ?;", conn, params=[details['Game_ID']])                            # Check if the Game_ID already exists
         if len(df) > 0:
             api.abort(400, "Game_ID {} already exists with Name '{}'".format(details['Game_ID'], df.loc[0][0]))
         df = pd.read_sql_query(
-            "SELECT Game_ID FROM Details WHERE Name = '{}';".format(details['Name']), conn)                             # Check if there is another game with the same Name
+            "SELECT Game_ID FROM Details WHERE Name = ?;", conn, params=[details['Name']])                             # Check if there is another game with the same Name
         if len(df) > 0:
             api.abort(400, "Game '{}' already exists with Game_ID = {}".format(details['Name'], df.loc[0][0]))
         if not (details['Name']):
@@ -192,13 +192,13 @@ class Board_Games_Details_List(Resource):
         conn = create_connection('Database')
         
         df = pd.read_sql_query(
-            "SELECT Detail_ID FROM Details WHERE Game_ID = {}".format(details['Game_ID']), conn)                        # Check if the game exists (Can't update a game that doesn't exist)
+            "SELECT Detail_ID FROM Details WHERE Game_ID = ?", conn, params=[details['Game_ID']])                        # Check if the game exists (Can't update a game that doesn't exist)
         if len(df) == 0:
             api.abort(404, "Game {} doesn't exist".format(details['Game_ID']))
         index = df.loc[0][0]
 
         df = pd.read_sql_query(
-            "SELECT Game_ID FROM Details WHERE Name = '{}';".format(details['Name']), conn)                             # Check if there is another game with the same updated Name
+            "SELECT Game_ID FROM Details WHERE Name = ?;", conn, params=[details['Name']])                             # Check if there is another game with the same updated Name
         if len(df) > 0:
             api.abort(400, "Game '{}' already exists with Game_ID={}".format(details['Name'], df.loc[0][0]))
         if not (details['Name']):
@@ -262,7 +262,7 @@ class Board_Games(Resource):
     def get(self, id):
         conn = create_connection('Database')
         df = pd.read_sql_query(
-            "SELECT * FROM Details WHERE Game_ID = {};".format(id), conn)
+            "SELECT * FROM Details WHERE Game_ID = ?;", conn, params=[id])
         if len(df) == 0:
             api.abort(404, "Game {} doesn't exist".format(id))
         details = df.loc[0].to_json()
@@ -288,7 +288,7 @@ class Board_Games_Year(Resource):
 
         conn = create_connection('Database')
         df = pd.read_sql_query(
-            "SELECT * FROM Details WHERE Year_Published = '{}' ORDER BY Year_Published;".format(str(year)), conn)
+            "SELECT * FROM Details WHERE Year_Published = ? ORDER BY Year_Published;", conn, params=[year])
         if len(df) == 0:
             api.abort(404, "No Games Published In Year {}".format(year))
 
@@ -315,7 +315,7 @@ class addReviews(Resource):
 
         conn = create_connection('Database')
         df = pd.read_sql_query(
-            "SELECT Name FROM Details WHERE Game_ID = {};".format(review['Game_ID']), conn)
+            "SELECT Name FROM Details WHERE Game_ID = ?;", conn, params=[review['Game_ID']])
         if len(df) == 0:
             api.abort(404, "Game {} doesn't exist".format(review['Game_ID']))
         if (review['Rating'] < 1 or review['Rating'] > 10):
@@ -342,11 +342,11 @@ class Reviews(Resource):
     def get(self, id):
         conn = create_connection('Database')
         df = pd.read_sql_query(
-            "SELECT Name FROM Details WHERE Game_ID = {};".format(id), conn)
+            "SELECT Name FROM Details WHERE Game_ID = ?;", conn, params=[id])
         if len(df) == 0:
             api.abort(404, "Game {} doesn't exist".format(id))
         df = pd.read_sql_query(
-            "SELECT * FROM Reviews WHERE Game_ID = {};".format(id), conn)
+            "SELECT * FROM Reviews WHERE Game_ID = ?;", conn, params=[id])
         if len(df) == 0:
             api.abort(404, "Game {} has no reviews".format(id))
 
@@ -377,7 +377,7 @@ class Recommendations(Resource):
     @api.doc(description="Get recommendations for a specific game")
     def get(self, id):
         conn = create_connection('Database')
-        df = pd.read_sql_query("SELECT Name FROM Details WHERE Game_ID = {};".format(id), conn)
+        df = pd.read_sql_query("SELECT Name FROM Details WHERE Game_ID = ?;", conn, params=[id])
         if len(df) == 0:
             api.abort(404, "Game {} doesn't exist".format(id))
         Name = df.loc[0][0]

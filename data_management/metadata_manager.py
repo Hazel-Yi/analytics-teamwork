@@ -20,7 +20,7 @@ class MetaDataManager:
         else:
             self.metadata = {}
         # automatic cleanup on program exit
-        atexit.register(self.save)
+        #atexit.register(self.save)
     
     def save(self):
         with open(self.metadata_fn, 'w') as f:
