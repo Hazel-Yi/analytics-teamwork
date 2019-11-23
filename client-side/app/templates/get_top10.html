@@ -11,19 +11,8 @@
       }
       td, th {
         border: 1px solid #dddddd;
-        text-align: left;
+        text-align: center;
         padding: 8px;
-      }
-      button {
-        border: none;
-        background-color: inherit;
-        padding: 14px 28px;
-        font-size: 16px;
-        cursor: pointer;
-        display: inline-block;
-      }
-      button:hover {
-        background: #eee;
       }
       section {
         display: -webkit-flex;
@@ -59,7 +48,7 @@
     
   <body>
     
-    <h1>FIND REVIEWS ON A BOARDGAME</h1>
+    <h1>POPULAR BOARDGAMES</h1>
     
     <section>
       <nav>
@@ -76,17 +65,11 @@
       </nav>
 
       <article>
-        <form method="post">
-          <input name="search" type="text" placeholder="board_game_id" style="height: 30px;" required="required">
-          <button type="submit">VIEW REVIEWS</button>
-        </form> 
-        
         <table>
           <tr>
-            <th width="10%">ID</th>
-            <th width="20%">USERNAME</th>
-            <th width="20%">RATING</th>
-            <th width="50%">COMMENT</th>
+            <th width="40%">ID</th>
+            <th width="40%">NAME</th>
+            <th width="20%">YEAR</th>
           </tr>
 
           {% for ll in listlist %}
@@ -97,11 +80,11 @@
             </tr>
           {% endfor %}
 
-        </table>  
+        </table>
       </article>
-
     </section>
     
   </body>
 
 </html>
+

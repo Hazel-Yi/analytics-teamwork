@@ -4,6 +4,40 @@ from app import app
 import json
 
 @app.route('/')
+@app.route('/get_top10')
+def get_top10():
+  r = requests.get("http://127.0.0.1:8000/details/top10", params={'order': 'Game_ID', 'ascending':True})
+  games = r.json()
+
+  '''testing = games[1]
+  print(testing)'''
+
+  listlist = []
+  game_id_list = []
+  name_list = []
+  year_list = []
+
+  for game in games:
+    sublist = []
+    for key in game.keys():
+      if key == 'Game_ID':
+        game_id = str(game[key])
+        game_id_list.append(game_id)
+      if key == 'Name':
+        name = str(game[key])
+        name_list.append(name)
+      if key == 'Year_Published':
+        year = str(game[key])
+        year_list.append(year)  
+    sublist.append(game_id)
+    sublist.append(name)
+    sublist.append(year)
+    listlist.append(sublist)
+
+  '''print(listlist[0])'''
+
+  return render_template('get_top10.html', title='Popular Boardgames', listlist=listlist)
+
 @app.route('/get_boardgame')
 def get_boardgame():
   r = requests.get("http://127.0.0.1:8000/details", params={'order': 'Game_ID', 'ascending':True})
