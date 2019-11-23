@@ -513,7 +513,7 @@ class Recommendations(Resource):
     @api.doc(
         description="Get recommendations for a specific game",
         params={
-            'Name': "Name of the Board Game",
+            #'Name': "Name of the Board Game",
             'Category': "List of board game categories",
             'Min_players': 'Minimum number of players',
             'Max_players': 'Maximum number of players',
@@ -544,8 +544,8 @@ class Recommendations(Resource):
         # Get list of recommendations
         try:
             result = getRecommendationByName(name)
-        except KeyError:
-            print('KEY ERROR')
+        except KeyError as e:
+            print('KEY ERROR:', e)
             api.abort(404, "Name was not found")
         # print(result)
         # Do series of filters
@@ -572,6 +572,9 @@ class Recommendations(Resource):
                 values = ast.literal_eval(details['Category'])
                 result['boardgamecategory'] = result['boardgamecategory'].replace(np.nan, '[]')
                 result = result[result['boardgamecategory'].apply(lambda x: set(ast.literal_eval(x)).issuperset(set(values)) )]
+            if 'Min_age' in details:
+                value = int(details['Min_age'])
+                result = result[result["minage"] >= value]
             if 'N' in details:
                 value = int(details['N'])
                 print(value)
@@ -586,17 +589,26 @@ class Recommendations(Resource):
 def getRecommendationByName(name):
     with open('recommendations.json') as json_data:
         games = json.load(json_data)
-    json_data.close()
-
     games = games[name]
     # print(games)
 
-    details = pd.read_csv("2019-05-02.csv")
-    top200 = details[details['Name'].isin(games)]
-    top200 = top200[["ID","Name"]]
-    player_detail = pd.read_csv("games_detailed_info.csv")
-    df = pd.merge(left=player_detail,right=top200,left_on='id',right_on='ID')
-    df = df[["ID","Name","boardgamepublisher","boardgamecategory","minplayers","maxplayers","minplaytime","maxplaytime","minage","description","boardgameexpansion","boardgamemechanic","thumbnail","yearpublished"]]
+    #details = pd.read_csv("2019-05-02.csv")
+    conn = create_connection('Database')
+    details = pd.read_sql_query("SELECT * FROM Details;", conn)
+    df = details[details['Name'].isin(games)] # top200
+    #top200 = top200[["Game_ID","Name"]]
+    #player_detail = pd.read_csv("games_detailed_info.csv")
+    #df = pd.merge(left=details,right=top200,left_on='Game_ID',right_on='Game_ID')
+    #df = df[["ID","Name","boardgamepublisher","boardgamecategory","minplayers","maxplayers","minplaytime","maxplaytime","minage","description","boardgameexpansion","boardgamemechanic","thumbnail","yearpublished"]]
+    categories = ['Game_ID', 'Name', 'Publisher', 'Category', 'Min_players', 'Max_players',
+                  'Min_playtime', 'Max_playtime', 'Min_age', 'Description', 'Expansion',
+                  'Mechanic', 'Thumbnail', 'Year_Published']
+    df = df[categories]
+    # to make compatible with old legacy code
+    compat_categories = ["ID","Name","boardgamepublisher","boardgamecategory","minplayers",
+                         "maxplayers","minplaytime","maxplaytime","minage","description",
+                         "boardgameexpansion","boardgamemechanic","thumbnail","yearpublished"]
+    df.columns = compat_categories
     return df
     
 
