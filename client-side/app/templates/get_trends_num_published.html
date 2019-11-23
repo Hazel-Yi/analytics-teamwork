@@ -95,11 +95,52 @@
         line-height: 18px; 
       }
     </style>
-  </head>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
     
+      google.charts.load('current', {'packages':['line']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        var data = new google.visualization.DataTable();
+        data.addColumn('number', 'Year');
+        data.addColumn('number', 'Boardgames Published');
+
+        data.addRows([
+          {% for x in listlist %}
+            [{{x.0}}, {{x.1}}],
+          {% endfor %}
+        ]);
+
+        var options = {
+          chart: {
+            title: 'Number of boardgames published in the last decade'
+          },
+          height: 700,
+          hAxis: {
+            format: ''
+          },
+          vAxis: {
+            format: '',
+          },
+          legend: { position: 'none' }
+        };
+
+        
+
+        var chart = new google.charts.Line(document.getElementById('linechart_material'));
+
+        chart.draw(data, google.charts.Line.convertOptions(options));
+      }
+    </script>
+
+  </head>
+
   <body>
     <br>
-    <h1>FIND REVIEWS ON A BOARDGAME</h1>
+    <h1>TRENDS</h1>
     <br>
     <section>
       <nav>
@@ -117,14 +158,10 @@
       </nav>
 
       <article>
-        <form method="post">
-          <input name="search" type="text" placeholder="board_game_id" style="height: 30px;" required="required">
-          <button type="submit">VIEW REVIEWS</button>
-        </form>
+        <div id="linechart_material"></div>
       </article>
-
     </section>
-    
+
   </body>
 
 </html>

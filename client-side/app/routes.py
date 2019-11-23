@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+from flask_paginate import Pagination, get_page_parameter
 import requests
 from app import app
 import json
@@ -34,7 +35,17 @@ def get_top10():
 
 @app.route('/get_boardgame')
 def get_boardgame():
-  r = requests.get("http://127.0.0.1:8000/details", params={'order': 'Game_ID', 'ascending':True})
+
+  q = request.args.get('q')
+  search=False
+  print(q)
+  if q:
+    search = True
+
+  page = request.args.get(get_page_parameter(), type=int, default=1)
+
+  r = requests.get("http://127.0.0.1:8000/details", params={'order': 'Game_ID', 'ascending':True, 'Page':page})
+  pagination = Pagination(page=page, total=17605, search=search, record_name='users',css_framework='bootstrap3')
   games = r.json()
 
   '''testing = games[1]
@@ -58,7 +69,7 @@ def get_boardgame():
     listlist.append(game_item)
 
 
-  return render_template('get_boardgame.html', title='All Boardgames', listlist=listlist)
+  return render_template('get_boardgame.html', title='All Boardgames', listlist=listlist, pagination=pagination)
     
 
 @app.route('/get_boardgame_id', methods=['GET', 'POST'])
@@ -309,3 +320,34 @@ def post_review():
 
     print(resp['message'])
   return render_template('post_review.html', title='Add a Review')
+
+@app.route('/num_published')
+def num_published():
+  r = requests.get("http://127.0.0.1:8000/trends/num_published")
+  trends = r.json()
+  trends_subset = trends[-10:]
+
+  print(trends_subset)
+
+  year_list = []
+  num_list = []
+  listlist = []
+
+  for trend in trends_subset:
+    sublist = []
+    for key in trend.keys():
+      if key == 'Year':
+        year = int(trend[key])
+        year_list.append(year)
+      if key == 'Number_Published':
+        num = int(trend[key])
+        num_list.append(num)
+    sublist.append(year)
+    sublist.append(num)
+    listlist.append(sublist)
+ 
+  print(year_list)
+  print(num_list)
+  print(listlist)
+
+  return render_template('get_trends_num_published.html', title='Trends', listlist=listlist)
