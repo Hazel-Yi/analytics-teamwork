@@ -119,6 +119,7 @@ class Board_Games_Details_List(Resource):
     @api.response(400, 'Validation Error')
     @api.doc(description="Add new board game details")
     @api.expect(detail_model, validate=True)
+    @requires_auth
     def post(self):
         details = request.json
         for key in details:
@@ -195,6 +196,7 @@ class Board_Games_Details_List(Resource):
     @api.response(200, 'Successful')
     @api.expect(detail_model)
     @api.doc(description="Update a game details by its ID")
+    @requires_auth
     def put(self):
         details = request.json
         conn = create_connection('Database')
