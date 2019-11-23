@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+from flask_paginate import Pagination, get_page_parameter
 import requests
 from app import app
 import json
@@ -34,7 +35,17 @@ def get_top10():
 
 @app.route('/get_boardgame')
 def get_boardgame():
-  r = requests.get("http://127.0.0.1:8000/details", params={'order': 'Game_ID', 'ascending':True})
+
+  q = request.args.get('q')
+  search=False
+  print(q)
+  if q:
+    search = True
+
+  page = request.args.get(get_page_parameter(), type=int, default=1)
+
+  r = requests.get("http://127.0.0.1:8000/details", params={'order': 'Game_ID', 'ascending':True, 'Page':page})
+  pagination = Pagination(page=page, total=17605, search=search, record_name='users',css_framework='bootstrap3')
   games = r.json()
 
   '''testing = games[1]
@@ -58,7 +69,7 @@ def get_boardgame():
     listlist.append(game_item)
 
 
-  return render_template('get_boardgame.html', title='All Boardgames', listlist=listlist)
+  return render_template('get_boardgame.html', title='All Boardgames', listlist=listlist, pagination=pagination)
     
 
 @app.route('/get_boardgame_id', methods=['GET', 'POST'])

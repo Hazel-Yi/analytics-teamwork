@@ -131,17 +131,22 @@ class Board_Games_Details_List(Resource):
     )
     # Chunk this to be loaded onto multiple pages
     def get(self):
-        details = request.json
+        details = request.args
         print(details)
         page_number = 1
         page_elements = 20
 
-        index_list = range( (page_number - 1)* page_elements, (page_number)*page_elements, 1) 
+
         if details is not None:
             if 'Page' in details:
-                page_number = details['Page']
+                page_number = int(details['Page'])
             if 'PageElements' in details:
-                page_elements = details['PageElements']
+                page_elements = int(details['PageElements'])
+
+        print(page_number, page_elements)
+
+        index_list = range( (page_number - 1)* page_elements, (page_number)*page_elements, 1) 
+        print(index_list)
 
         conn = create_connection('Database')
         df = pd.read_sql_query("SELECT * FROM Details;", conn)
