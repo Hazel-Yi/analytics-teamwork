@@ -126,25 +126,41 @@
             display table when user searches with an appropriate id
           -->
           <table>
-              <tr>
-                <th width="10%">ID</th>
+              <!-- <tr>
+                <th width="10%">NAME</th>
                 <th width="20%">PUBLISHED_BY</th>
                 <th width="20%">CATEGORIES</th>
                 <th width="30%">DESCRIPTION</th>
                 <th width="20%">EXPANSIONS</th>
-              </tr>
+              </tr> -->
     
               {% for ll in listlist %}
-                <tr>
-                  <td>{{ll.Name}}</td>
-                  <td>{{ll.Publisher}}</td>
-                  <td>{{ll.Category}}</td>
-                  <td>{{ll.Description}}</td>
-                  <td>{{ll.Expansion}}</td>
-                </tr>
+                <table>
+                    <tr>
+                      <td width="20%">NAME</td>
+                      <td>{{ ll.Name }}</td>
+                    </tr>
+                    <tr>
+                      <td width="20%">PUBLISHED BY</td>
+                      <td>{{ ll.Publisher }}</td>
+                    </tr>
+                    <tr>
+                      <td width="20%">CATEGORIES</td>
+                      <td>{{ ll.Category }}</td>
+                    </tr>
+                    <tr>
+                      <td width="20%">DESCRIPTION</td>
+                      <td>{{ ll.Description }}</td>
+                    </tr>
+                    <tr>
+                      <td width="20%">EXPANSIONS</td>
+                      <td>{{ ll.Expansion }}</td>
+                    </tr>
+                </table>
+                <br>
+                <br>
               {% endfor %}
     
-          </table>
       </article>
     </section>
     

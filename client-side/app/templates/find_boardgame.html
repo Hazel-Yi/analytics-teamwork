@@ -14,7 +14,7 @@
         text-align: center;
         padding: 8px;
       }
-      button {
+      .button {
         border: none;
         background-color: inherit;
         padding: 14px 28px;
@@ -22,7 +22,7 @@
         cursor: pointer;
         display: inline-block;
       }
-      button:hover {
+      .button:hover {
         background: #eee;
       }
       section {
@@ -117,8 +117,9 @@
       </nav>
 
       <article>
-        <a href="{{ url_for('get_boardgame_id') }}" class="button">FIND BOARDGAME BY ID</a>
-        <a href="{{ url_for('get_boardgame_name') }}" class="button">FIND BOARDGAME BY NAME</a>
+        <a href="{{ url_for('get_boardgame_id') }}" class="button button:hover" >FIND BOARDGAME BY ID</a>
+        <br>
+        <a href="{{ url_for('get_boardgame_name') }}" class="button button:hover">FIND BOARDGAME BY NAME</a>
       </article>
     </section>
     
