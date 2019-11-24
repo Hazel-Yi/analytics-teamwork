@@ -12,7 +12,8 @@ Pricing information is webscrapped from https://www.boardgamegateway.com/ and ht
 Make sure you have (at least) the following installed:
 
  * Python 3
- * Flask and Flask RESTPlus
+ * Flask and Flask RESTPlus and flask-paginate
+ * matplotlib
  * pandas
  * sqlite3
  * Jupyter Notebook
