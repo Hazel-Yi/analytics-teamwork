@@ -13,6 +13,7 @@ from Create_db import create_connection
 #from itsdangerous import JSONWebSignatureSerializer as Serializer
 from auth import *
 import numpy as np
+from webscraper import get_price
 
 
 app = Flask(__name__)
@@ -343,6 +344,10 @@ class Board_Games(Resource):
             api.abort(404, "Game {} doesn't exist".format(id))
         details = df.loc[0].to_json()
         details = json.loads(details)
+        price = get_price(details['Name'], True)                #####
+        if price:                                               #####
+            details['URL'] = price[1]                           #####
+            details['Price'] = price[2]                         #####
 
         mm.increment('/board_games_details/{}'.format(id))
         mm.save()
