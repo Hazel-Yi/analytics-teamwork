@@ -6,8 +6,9 @@ import ast
 import pandas as pd
 from datetime import datetime
 from flask import Flask, request, jsonify
-from flask_restplus import Resource, Api, fields, inputs, abort
+from flask_restplus import Resource, Api, fields, inputs, abort,reqparse
 from data_management import metadata_manager
+import pandas.io.sql as psql
 from Create_db import create_connection
 #from itsdangerous import JSONWebSignatureSerializer as Serializer
 from auth import *
@@ -346,8 +347,26 @@ class Board_Games(Resource):
         mm.increment('/board_games_details/{}'.format(id))
         mm.save()
         return details, 200
-
-
+       
+    @api.response(404, 'Game was not found')
+    @api.response(200, 'Successful')
+    @api.doc(description="Delete a Game by its ID")
+    #@requires_auth
+    def delete(self, id):
+        conn = create_connection('Database')
+        cur = conn.cursor()
+        before = pd.read_sql_query("SELECT COUNT(*)",conn)
+        print(before)
+        cur.execute("delete from Details where Game_ID = ?", (id,))
+        conn.commit()
+        #df = psql.frame_query("SELECT * FROM Details ;", conn)
+        #if(before == len(df)):
+        #    api.abort(404, "Game {} doesn't exist".format(id))
+        mm.increment('/board_games_details/{}'.format(id))
+        mm.save()
+        return {"message": "Game {} is removed.".format(id)}, 200
+  
+    
 @api.route('/details/<string:name>')
 @api.param('name', 'Game Name')
 class Board_Games_Name(Resource):
@@ -382,6 +401,7 @@ class Board_Games_Year(Resource):
         conn = create_connection('Database')
         df = pd.read_sql_query(
             "SELECT * FROM Details WHERE Year_Published = ? ORDER BY Year_Published;", conn, params=[year])
+        print(df.head())
         if len(df) == 0:
             api.abort(404, "No Games Published In Year {}".format(year))
 
@@ -674,6 +694,7 @@ def filterRecommendations(details, result):
 
 
 #########################################################################
+'''
 @api.route('/auth')
 class Token(Resource):
     @api.response(200, 'Successful')
@@ -682,7 +703,36 @@ class Token(Resource):
         mm.increment('/auth')
         mm.save()
         return {'token': auth.generate_token().decode()}, 200
+'''   
 
+parser = reqparse.RequestParser()
+
+credential_model = api.model('credential', {
+    'username': fields.String,
+    'password': fields.String
+})
+
+credential_parser = reqparse.RequestParser()
+credential_parser.add_argument('username', type=str)
+credential_parser.add_argument('password', type=str)
+
+@api.route('/auth')
+class Token(Resource):
+    @api.response(200, 'Successful')
+    @api.doc(description="Generates a authentication token")
+    @api.expect(credential_parser, validate=True)
+    def get(self):
+        args = credential_parser.parse_args()
+
+        username = args.get('username')
+        password = args.get('password')
+        mm.increment('/auth')
+        mm.save()
+        if username == 'admin' and password == 'admin':
+            print(username)
+            return {'token': auth.generate_token().decode()}, 200
+
+        return {"message": "authorization has been refused for those credentials."}, 401
 
 #########################################################################
 if __name__ == '__main__':
