@@ -355,13 +355,14 @@ class Board_Games(Resource):
     def delete(self, id):
         conn = create_connection('Database')
         cur = conn.cursor()
-        before = pd.read_sql_query("SELECT COUNT(*)",conn)
-        print(before)
+        df = pd.read_sql_query("SELECT * from Details",conn) 
+        before = len(df)
         cur.execute("delete from Details where Game_ID = ?", (id,))
         conn.commit()
-        #df = psql.frame_query("SELECT * FROM Details ;", conn)
-        #if(before == len(df)):
-        #    api.abort(404, "Game {} doesn't exist".format(id))
+        
+        df = pd.read_sql_query("SELECT * from Details",conn)
+        if(before == len(df)):
+            api.abort(404, "Game {} doesn't exist".format(id))
         mm.increment('/board_games_details/{}'.format(id))
         mm.save()
         return {"message": "Game {} is removed.".format(id)}, 200
