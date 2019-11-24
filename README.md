@@ -21,10 +21,11 @@ To initialise the sqlite3 database, please run the following commands:
 
 ```
 python Create_db.py
-python gen_review_stats.py
 ```
 
 The cached results of the machine learning model for performing board game recommendations is stored in `recommendations.json`. This should already be provided in the repository. However, if you would like to re-generate this data source, this can be done by opening a new session of `jupyter notebook` and doing Cell > Run All on the `BoardGames.ipynb` notebook.
+
+The cached results for one of the trend endpoints is stored in `review_rating_quantiles.json` (due to the time needed to generate it) and should also already be provided by the repository. If it needs to be re-generated however, please run: `python gen_review_stats.py` from the root directory.
 
 
 ## Runtime Instructions
