@@ -351,7 +351,7 @@ class Board_Games(Resource):
     @api.response(404, 'Game was not found')
     @api.response(200, 'Successful')
     @api.doc(description="Delete a Game by its ID")
-    #@requires_auth
+    @requires_auth
     def delete(self, id):
         conn = create_connection('Database')
         cur = conn.cursor()
@@ -359,7 +359,7 @@ class Board_Games(Resource):
         before = len(df)
         cur.execute("delete from Details where Game_ID = ?", (id,))
         conn.commit()
-        
+
         df = pd.read_sql_query("SELECT * from Details",conn)
         if(before == len(df)):
             api.abort(404, "Game {} doesn't exist".format(id))
@@ -467,6 +467,25 @@ class Reviews(Resource):
         mm.increment('/reviews/{}'.format(id))
         mm.save()
         return get_dict_entries(df), 200
+
+    @api.response(404, 'Review was not found')
+    @api.response(200, 'Successful')
+    @api.doc(description="Delete review(s) by its Game ID")
+    @requires_auth
+    def delete(self, id):
+        conn = create_connection('Database')
+        cur = conn.cursor()
+        df = pd.read_sql_query("SELECT * from Reviews",conn) 
+        before = len(df)
+        cur.execute("delete from Reviews where Game_ID = ?", (id,))
+        conn.commit()
+
+        df = pd.read_sql_query("SELECT * from Reviews",conn)
+        if(before == len(df)):
+            api.abort(404, "Reviews about game:{} doesn't exist".format(id)) 
+        mm.increment('/reviews/{}'.format(id))
+        mm.save()
+        return {"message": "Reviews about Game:{} is removed.".format(id)}, 200
 
 #########################################################################
 # can be changed to include the number of top games the user wants /details/top/{int}

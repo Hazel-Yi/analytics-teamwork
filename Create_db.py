@@ -18,8 +18,9 @@ def create_connection(db_file):
 
 def create_database(db_file):
     if os.path.exists(db_file +'.db'):
+        conn = sqlite3.connect(db_file+'.db')
         print(db_file +'.db already exists')
-        return
+        return conn
     conn = sqlite3.connect(db_file+'.db')
     print(db_file +'.db Created.')
     return conn
@@ -76,7 +77,6 @@ def create_table_details(dataframe, conn):
             'id': 'Game_ID',
             'primary': 'Name',
             'Board Game Rank': 'Board_Game_Rank',
-            #'bayesaverage': 'Bayes_Average',
             'boardgamepublisher': 'Publisher',
             'boardgamecategory': 'Category',
             'minplayers': 'Min_players',
@@ -95,7 +95,6 @@ def create_table_details(dataframe, conn):
             'Game_ID',
             'Name',
             'Board_Game_Rank',
-            #'Bayes_Average',
             'Publisher',
             'Category',
             'Min_players',

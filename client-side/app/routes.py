@@ -190,6 +190,7 @@ def post_boardgame():
 
   return render_template('post_boardgame.html', title='Add a Boardgame')
 
+
 @app.route('/put_boardgame', methods=['GET', 'POST', 'PUT'])
 def put_boardgame():
   if request.method == 'POST':
