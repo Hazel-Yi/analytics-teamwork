@@ -83,13 +83,13 @@ def get_boardgame_id():
       if key == 'Name':
         name = str(game[key])
       if key == 'Publisher':
-        published_by = str(game[key])
+        published_by = game[key]
       if key == 'Category':
-        categories = str(game[key])
+        categories = game[key]
       if key == 'Description':
         description = str(game[key])
       if key == 'Expansion':
-        expansions = str(game[key])
+        expansions = game[key]
     return render_template('get_boardgame_id_2.html', title='Find Boardgame', name=name, published_by=published_by, categories=categories, description=description, expansions=expansions)
   else:
     return render_template('get_boardgame_id.html', title='Find Boardgame')
@@ -158,7 +158,7 @@ def post_boardgame():
 
   return render_template('post_boardgame.html', title='Add a Boardgame')
 
-@app.route('/put_boardgame', methods=['GET', 'POST'])
+@app.route('/put_boardgame', methods=['GET', 'POST', 'PUT'])
 def put_boardgame():
   if request.method == 'POST':
     published_by = []
@@ -166,6 +166,7 @@ def put_boardgame():
     expansions = []
     mechanics = []
     board_game_family = []
+
     game_id = request.form['id']
     name = request.form['name']
     published_by.append(request.form['published_by'])
@@ -181,10 +182,47 @@ def put_boardgame():
     mechanics.append(request.form['mechanics'])
     thumbnail = request.form['thumbnail']
     year = request.form['year']
-    
+
+    r = requests.get("http://127.0.0.1:8000/details/" + str(game_id))
+    searched_game = r.json()
+
+    print(searched_game)
+    print("lol")
+
+    if name == "":
+      name = str(searched_game['Name'])
+    if published_by[0] == "":
+      published_by = []
+      published_by.append(searched_game['Publisher'])
+    if categories[0] == "":
+      categories[0] = searched_game['Category']
+    if min_players == "":
+      min_players = int(searched_game['Min_players'])
+    if max_players == "":
+      max_players = int(searched_game['Min_players'])
+    if min_age == "":
+      min_age = int(searched_game['Min_age'])
+    if min_playtime == "":
+      min_playtime = int(searched_game['Min_playtime'])
+    if max_playtime == "":
+      max_playtime = int(searched_game['Max_playtime'])
+    if description == "":
+      description = str(searched_game['Description'])
+    if expansions[0] == "":
+      expansions[0] = searched_game['Expansion']
+    if board_game_family[0] == "":
+      board_game_family[0] = searched_game['Board_Game_Family']
+    if mechanics[0] == "":
+      mechanics[0] = searched_game['Mechanic']
+    if thumbnail == "":
+      thumbnail = str(searched_game['Thumbnail'])
+    if year == "":
+      year = int(searched_game['Year_Published'])
+
     game = {
       'Game_ID': int(game_id),
       'Name': name,
+      'Board_Game_Rank': searched_game['Board_Game_Rank'],
       'Publisher': published_by,
       'Category': categories,
       'Min_players': int(min_players),
@@ -200,34 +238,16 @@ def put_boardgame():
       'Year_Published': int(year)
     }
 
-    r = requests.get("http://127.0.0.1:8s000/details/" + str(game_id))
-    searched_game = r.json()
-
-    for key in searched_game.keys():
-      if key == 'Name':
-        if str(searched_game[key]) == name:
-          print("okay")
-        else:
-          print("not okay")
-
-    print("searched for a game with id " + game_id)
-
     print(game)
 
     auth = requests.get("http://127.0.0.1:8000/auth")
     token = auth.json()
-
-    print(token)
     for key in token.keys():
       t = str(token[key])
-      
-    print(t)
 
-    '''print(searched_game)
-
-    r = requests.put("http://127.0.0.1:8000/details/" + str(game_id), headers={'AUTH-TOKEN': t})
-    game = r.json()
-    print(game)'''
+    r = requests.put("http://127.0.0.1:8000/details/", json=game, headers={'AUTH-TOKEN': t})
+    inputgame = r.json()
+    print(inputgame)
 
   return render_template('put_boardgame.html', title='Update a Boardgame')
 
@@ -323,11 +343,13 @@ def post_review():
 
 @app.route('/num_published')
 def num_published():
+
+  ''' for num published '''
   r = requests.get("http://127.0.0.1:8000/trends/num_published")
   trends = r.json()
   trends_subset = trends[-10:]
 
-  print(trends_subset)
+  '''print(trends_subset)'''
 
   year_list = []
   num_list = []
@@ -346,8 +368,60 @@ def num_published():
     sublist.append(num)
     listlist.append(sublist)
  
-  print(year_list)
+  '''print(year_list)
   print(num_list)
-  print(listlist)
+  print(listlist)'''
 
-  return render_template('get_trends_num_published.html', title='Trends', listlist=listlist)
+  ''' for rating stats '''
+
+  r = requests.get("http://127.0.0.1:8000/trends/rating_stats")
+  rating_stats = r.json()
+  rating_stats_subset = rating_stats[-10:]
+
+  print(rating_stats_subset)
+
+  min_list = []
+  q1_list = []
+  median_list = []
+  q3_list = []
+  max_list = []
+  average_list = []
+  year_list_2 = []
+  listlist_2 = []
+
+  for rating_stat in rating_stats_subset:
+    sublist = []
+    for key in rating_stat.keys():
+      if key == 'Min_Rating':
+        min_r = int(rating_stat[key])
+        min_list.append(min_r)
+      if key == 'Q1_Rating':
+        q1 = int(rating_stat[key])
+        q1_list.append(q1)
+      if key == 'Median_Rating':
+        med = int(rating_stat[key])
+        median_list.append(med)
+      if key == 'Q3_Rating':
+        q3 = int(rating_stat[key])
+        q3_list.append(q3)
+      if key == 'Max_Rating':
+        max_r = int(rating_stat[key])
+        max_list.append(max_r)
+      if key == 'Average_Rating':
+        ave = int(rating_stat[key])
+        average_list.append(ave)
+      if key == 'Year':
+        year = int(rating_stat[key])
+        year_list_2.append(year)
+    sublist.append(year)
+    sublist.append(min_r)
+    sublist.append(q1)
+    sublist.append(med)
+    sublist.append(q3)
+    sublist.append(max_r)
+    sublist.append(ave)
+    listlist_2.append(sublist)
+  
+  print(listlist_2)
+
+  return render_template('get_trends_num_published.html', title='Trends', listlist=listlist, listlist_2=listlist_2)

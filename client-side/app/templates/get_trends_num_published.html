@@ -123,7 +123,7 @@
             format: ''
           },
           vAxis: {
-            format: '',
+            format: ''
           },
           legend: { position: 'none' }
         };
@@ -135,7 +135,46 @@
         chart.draw(data, google.charts.Line.convertOptions(options));
       }
     </script>
+    <script type="text/javascript">
+    
+      google.charts.load('current', {'packages':['line']});
+      google.charts.setOnLoadCallback(drawChart);
 
+      function drawChart() {
+
+        var data = new google.visualization.DataTable();
+        data.addColumn('number', 'Year');
+        data.addColumn('number', 'Minimum Rating');
+        data.addColumn('number', 'First Quartile Rating');
+        data.addColumn('number', 'Median Rating');
+        data.addColumn('number', 'Third Quartile Rating');
+        data.addColumn('number', 'Maximum Rating');
+        data.addColumn('number', 'Average Rating');
+
+        data.addRows([
+          {% for x in listlist_2 %}
+            [{{x.0}}, {{x.1}}, {{x.2}}, {{x.3}}, {{x.4}}, {{x.5}}, {{x.6}}],
+          {% endfor %}
+        ]);
+
+        var options = {
+          title: 'Statistics of all boardgames\' ratings published for each year in the last decade',
+          height: 700,
+          hAxis: {
+            format: ''
+          },
+          vAxis: {
+            format: ''
+          }
+        };
+
+        
+
+        var chart = new google.charts.Line(document.getElementById('linechart_material_2'));
+
+        chart.draw(data, google.charts.Line.convertOptions(options));
+      }
+    </script>
   </head>
 
   <body>
@@ -159,6 +198,8 @@
 
       <article>
         <div id="linechart_material"></div>
+        <br>
+        <div id="linechart_material_2"></div>
       </article>
     </section>
 
