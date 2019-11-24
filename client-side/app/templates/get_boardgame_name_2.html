@@ -118,7 +118,7 @@
 
       <article>
           <form method="post">
-            <input name="search" type="text" placeholder="board_game_id" style="font-size:14pt;" required="required">
+            <input name="search" type="text" placeholder="board_game_name" style="font-size:14pt;" required="required">
             <button type="submit">FIND BOARDGAME</button>
           </form>
 
@@ -127,26 +127,24 @@
           -->
           <table>
               <tr>
-                <td width="20%">NAME</td>
-                <td>{{ name }}</td>
+                <th width="10%">ID</th>
+                <th width="20%">PUBLISHED_BY</th>
+                <th width="20%">CATEGORIES</th>
+                <th width="30%">DESCRIPTION</th>
+                <th width="20%">EXPANSIONS</th>
               </tr>
-              <tr>
-                <td width="20%">PUBLISHED BY</td>
-                <td>{{ published_by }}</td>
-              </tr>
-              <tr>
-                <td width="20%">CATEGORIES</td>
-                <td>{{ categories }}</td>
-              </tr>
-              <tr>
-                <td width="20%">DESCRIPTION</td>
-                <td>{{ description }}</td>
-              </tr>
-              <tr>
-                <td width="20%">EXPANSIONS</td>
-                <td>{{ expansions }}</td>
-              </tr>
-            </table>
+    
+              {% for ll in listlist %}
+                <tr>
+                  <td>{{ll.Name}}</td>
+                  <td>{{ll.Publisher}}</td>
+                  <td>{{ll.Category}}</td>
+                  <td>{{ll.Description}}</td>
+                  <td>{{ll.Expansion}}</td>
+                </tr>
+              {% endfor %}
+    
+          </table>
       </article>
     </section>
     

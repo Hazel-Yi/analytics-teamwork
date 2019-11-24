@@ -70,7 +70,11 @@ def get_boardgame():
 
 
   return render_template('get_boardgame.html', title='All Boardgames', listlist=listlist, pagination=pagination)
-    
+  
+
+@app.route('/find_boardgame', methods=['GET', 'POST'])
+def find_boardgame():
+  return render_template('find_boardgame.html', title='Find Boardgame')
 
 @app.route('/get_boardgame_id', methods=['GET', 'POST'])
 def get_boardgame_id():
@@ -93,6 +97,34 @@ def get_boardgame_id():
     return render_template('get_boardgame_id_2.html', title='Find Boardgame', name=name, published_by=published_by, categories=categories, description=description, expansions=expansions)
   else:
     return render_template('get_boardgame_id.html', title='Find Boardgame')
+
+@app.route('/get_boardgame_name', methods=['GET', 'POST'])
+def get_boardgame_name():
+  if request.method == 'POST':
+    search_name = request.form['search']
+    print("searched for a game with name " + search_name) 
+    r = requests.get("http://127.0.0.1:8000/details/" + str(search_name))
+    games = r.json()
+
+    listlist = []
+    for game in games:
+      game_item = {}
+      for key in game.keys():
+        if key == 'Name':
+          game_item[key] = str(game[key])
+        if key == 'Publisher':
+          game_item[key] = game[key]
+        if key == 'Category':
+          game_item[key] = game[key]
+        if key == 'Description':
+          game_item[key] = str(game[key])
+        if key == 'Expansion':
+          game_item[key] = game[key]
+      listlist.append(game_item)
+    
+    return render_template('get_boardgame_name_2.html', title='Find Boardgame', listlist=listlist)
+  else:
+    return render_template('get_boardgame_name.html', title='Find Boardgame')
 
 @app.route('/post_boardgame', methods=['GET', 'POST'])
 def post_boardgame():
@@ -187,7 +219,6 @@ def put_boardgame():
     searched_game = r.json()
 
     print(searched_game)
-    print("lol")
 
     if name == "":
       name = str(searched_game['Name'])

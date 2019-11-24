@@ -118,35 +118,9 @@
 
       <article>
           <form method="post">
-            <input name="search" type="text" placeholder="board_game_id" style="font-size:14pt;" required="required">
+            <input name="search" type="text" placeholder="board_game_name" style="font-size:14pt;" required="required">
             <button type="submit">FIND BOARDGAME</button>
           </form>
-
-          <!-- 
-            display table when user searches with an appropriate id
-          -->
-          <table>
-              <tr>
-                <td width="20%">NAME</td>
-                <td>{{ name }}</td>
-              </tr>
-              <tr>
-                <td width="20%">PUBLISHED BY</td>
-                <td>{{ published_by }}</td>
-              </tr>
-              <tr>
-                <td width="20%">CATEGORIES</td>
-                <td>{{ categories }}</td>
-              </tr>
-              <tr>
-                <td width="20%">DESCRIPTION</td>
-                <td>{{ description }}</td>
-              </tr>
-              <tr>
-                <td width="20%">EXPANSIONS</td>
-                <td>{{ expansions }}</td>
-              </tr>
-            </table>
       </article>
     </section>
     
