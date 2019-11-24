@@ -42,6 +42,6 @@ To run the server (decoupled, data-only API back-end), please run the following 
 python API.py
 ```
 
-## Link to trained model
+## Old link to trained model (for Meeting 1)
 https://drive.google.com/file/d/1kfv4QfATkuh3atbocB9nfHJLdBk-fptI/view?usp=sharing
 
