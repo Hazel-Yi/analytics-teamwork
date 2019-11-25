@@ -16,11 +16,12 @@ The Swagger JSON file and the single page document for the API use cases (`Comp9
 Make sure you have (at least) the following installed:
 
  * Python 3
- * Flask and Flask RESTPlus and flask-paginate
+ * Flask and Flask RESTPlus and flask-paginate, flask_cors
  * matplotlib
  * pandas
  * sqlite3
  * Jupyter Notebook
+ 
 
 To initialise the sqlite3 database, please run the following commands:
 
