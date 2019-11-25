@@ -1,6 +1,9 @@
 <html>
   
   <head>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+      <script  type="text/javascript" src="https://www.tutorialrepublic.com/examples/js/typeahead/0.11.1/typeahead.bundle.js"></script>
     <title>{{ title }}</title>
     <style>
       table {
@@ -94,6 +97,55 @@
         font-weight: 400; 
         line-height: 18px; 
       }
+
+      .bs-example {
+	font-family: sans-serif;
+	position: relative;
+	margin: 100px;
+}
+.typeahead, .tt-query, .tt-hint {
+	border: 2px solid #CCCCCC;
+	border-radius: 8px;
+	font-size: 22px; /* Set input font size */
+	height: 30px;
+	line-height: 30px;
+	outline: medium none;
+	padding: 8px 12px;
+	width: 396px;
+}
+.typeahead {
+	background-color: #FFFFFF;
+}
+.typeahead:focus {
+	border: 2px solid #0097CF;
+}
+.tt-query {
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+}
+.tt-hint {
+	color: #999999;
+}
+.tt-menu {
+	background-color: #FFFFFF;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	border-radius: 8px;
+	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+	margin-top: 12px;
+	padding: 8px 0;
+	width: 422px;
+}
+.tt-suggestion {
+	font-size: 22px;  /* Set suggestion dropdown font size */
+	padding: 3px 20px;
+}
+.tt-suggestion:hover {
+	cursor: pointer;
+	background-color: #0097CF;
+	color: #FFFFFF;
+}
+.tt-suggestion p {
+	margin: 0;
+}
     </style>
   </head>
     
@@ -117,14 +169,117 @@
       </nav>
 
       <article>
-        <form method="post">
+        <!-- <form method="post">
           <input name="search" type="text" placeholder="board_game_id" style="font-size:14pt;" required="required">
           <input name="num_rec" type="text" placeholder="num_of_recommendations" style="font-size:14pt;" required="required">
           <button type="submit">RECOMMEND GAMES</button>
-        </form>
+        </form> -->
+        <form method="post">
+            <div class="form-group">
+              <label for="exampleInputEmail1">Recommendation Game Search</label>
+              <br>
+              <input type="text" class="typeahead tt-query form-control" id="myInput" name="search" aria-describedby="gameRecommendation" placeholder="Search for a similar game">
+              <br>
+              <br>
+
+              <label for="exampleInputEmail1">Player Requirements</label>
+              <div class="row">
+                 
+                  <br>
+                  <div class="col">
+                    <input type="text" class="form-control" name="min_players" placeholder="Minimum players">
+                  </div>
+                  <div class="col">
+                    <input type="text" class="form-control" name="max_players" placeholder="Maximum players">
+                  </div>
+              </div>
+              <br>
+              <label for="exampleInputEmail1">Filter by Published Year</label>
+
+              <div class="row">
+                  <div class="col">
+                    <input type="text" class="form-control" name="min_year" placeholder="Year Published Min">
+                  </div>
+                  <div class="col">
+                    <input type="text" class="form-control" name="max_year" placeholder="Year Published Max">
+                  </div>
+              </div>
+              <br>
+
+              <label for="exampleInputEmail1">Filter by Playtime</label>
+
+              <div class="row">
+                  <div class="col">
+                    <input type="text" class="form-control" name="min_playtime" placeholder="Minimum Playtime">
+                  </div>
+                  <div class="col">
+                    <input type="text" class="form-control" name="max_playtime" placeholder="Maximum Playtime">
+                  </div>
+              </div>
+              <br>
+              <div class="form-group">
+                  <label for="exampleFormControlSelect2">Category Select</label>
+                  <select multiple class="form-control" name='category' id="exampleFormControlSelect2">
+                    { % for option in options %}
+                      <option>{{option}}</option>
+                    { % endfor % }
+                  </select>
+                </div>
+              
+
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+
+          <table>
+              <tr>
+                <th width="20%">ID</th>
+                <th width="40%">NAME</th>
+                <th width="40%">IMAGE</th>
+              </tr>
+      
+              <!--
+                make this part dynamic so it displays rows of games
+              -->
+              {% if games %}
+              {% for r in games %}
+                <tr>
+                  <td>{{r.ID}}</td>
+                  <td>{{r.Name}}</td>
+                  <td><img style="display:block" width=100% src={{r.thumbnail}}></td>
+                </tr>
+              {% endfor %}
+              {% endif %}
+              
+              </table>
       </article>
     </section>
     
   </body>
+  <script>
+    $(document).ready(function(){
+    // Defining the local dataset
+    var cars = ['Catan','Carcassonne','Pandemic','7 Wonders','Dominion','Ticket to Ride','Agricola','Puerto Rico','Small World','Codenames','Power Grid','King of Tokyo','Ticket to Ride: Europe','Love Letter','Splendor','Citadels','Dixit','Race for the Galaxy','7 Wonders Duel','Scythe','Lords of Waterdeep','Terraforming Mars','Stone Age','The Castles of Burgundy','Munchkin','Forbidden Island','Twilight Struggle','Arkham Horror','Bohnanza','Patchwork','Dead of Winter: A Crossroads Game','Terra Mystica','Hanabi','Lost Cities','The Resistance','Pandemic Legacy: Season 1','Betrayal at House on the Hill','Battlestar Galactica: The Board Game','Coup','Star Realms','Jaipur','Takenoko','Magic: The Gathering','Azul','Dominion: Intrigue','Robinson Crusoe: Adventures on the Cursed Island','Sushi Go!','Risk','Five Tribes','Galaxy Trucker','Blood Rage','Alhambra','Hive','Caylus','Gloomhaven','Tzolkin: The Mayan Calendar','Android: Netrunner','Chess','Eclipse','A Game of Thrones: The Board Game (Second Edition)','Cosmic Encounter','Sheriff of Nottingham'];
+    
+    // Constructing the suggestion engine
+    var cars = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.whitespace,
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        local: cars
+    });
+    
+    // Initializing the typeahead
+    $('.typeahead').typeahead({
+        hint: true,
+        highlight: true, /* Enable substring highlighting */
+        minLength: 1 /* Specify minimum characters required for showing result */
+    },
+    {
+        name: 'cars',
+        source: cars
+    });
+});  
+   </script>
 
 </html>
