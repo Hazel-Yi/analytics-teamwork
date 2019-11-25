@@ -39,6 +39,10 @@ class NullableString(fields.String):
     __schema_type__ = ['string', 'null']
     __schema_example__ = 'nullable string'
 
+class NullableList(fields.List):
+    __schema_type__ = ['list', 'null']
+    __schema_example__ = 'nullable list'
+
 def get_dict_entries(df, start_pos=None, num_rows=None, keyval_list=[]):
     if start_pos == None:
         start_pos = 0
@@ -69,15 +73,15 @@ detail_model = api.model('Detail', {
     'Board_Game_Rank': fields.Integer,
     #'Bayes_Average': fields.Float,
     'Publisher': fields.String,
-    'Category': fields.String,
+    'Category': NullableList(fields.String),
     'Min_players': fields.Integer,
     'Max_players': fields.Integer,
     'Min_age': fields.Integer,
     'Min_playtime': fields.Integer,
     'Max_playtime': fields.Integer,
     'Description': fields.String,
-    'Expansion': NullableString,
-    'Board_Game_Family': fields.String,
+    'Expansion': NullableList(fields.String),
+    'Board_Game_Family': NullableList(fields.String),
     'Mechanic': fields.String,
     'Thumbnail': fields.Url,
     'Year_Published': fields.Integer
