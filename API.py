@@ -35,6 +35,9 @@ mm = metadata_manager.MetaDataManager()
 # null / None. A list of dataframe column names can be provided to interpret each element under
 # that column as a list.
 
+class NullableString(fields.String):
+    __schema_type__ = ['string', 'null']
+    __schema_example__ = 'nullable string'
 
 def get_dict_entries(df, start_pos=None, num_rows=None, keyval_list=[]):
     if start_pos == None:
@@ -63,19 +66,19 @@ review_model = api.model('Review', {
 detail_model = api.model('Detail', {
     'Game_ID': fields.Integer,
     'Name': fields.String,
-    'Board_Game_Rank': fields.String,
+    'Board_Game_Rank': fields.Integer,
     #'Bayes_Average': fields.Float,
-    'Publisher': fields.List(fields.String),
-    'Category': fields.List(fields.String),
+    'Publisher': fields.String,
+    'Category': fields.String,
     'Min_players': fields.Integer,
     'Max_players': fields.Integer,
     'Min_age': fields.Integer,
     'Min_playtime': fields.Integer,
     'Max_playtime': fields.Integer,
     'Description': fields.String,
-    'Expansion': fields.List(fields.String),
-    'Board_Game_Family': fields.List(fields.String),
-    'Mechanic': fields.List(fields.String),
+    'Expansion': NullableString,
+    'Board_Game_Family': fields.String,
+    'Mechanic': fields.String,
     'Thumbnail': fields.Url,
     'Year_Published': fields.Integer
 })
@@ -194,7 +197,7 @@ class Board_Games_Details_List(Resource):
                 details['Name'], df.loc[0][0]))
         if not (details['Name']):
             api.abort(400, "Name field is missing")
-        details['Board_Game_Rank'] = details['Board_Game_Rank'].strip()
+        details['Board_Game_Rank'] = details['Board_Game_Rank']
         if not (details['Board_Game_Rank']):
             pass
         else:
