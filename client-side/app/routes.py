@@ -3,6 +3,7 @@ from flask_paginate import Pagination, get_page_parameter
 import requests
 from app import app
 import json
+import ast
 
 @app.route('/')
 @app.route('/get_top10')
@@ -137,7 +138,8 @@ def post_boardgame():
 
     game_id = request.form['id']
     name = request.form['name']
-    rank = ""
+    rank = request.form['board_game_rank']
+    #rank = ""
     published_by.append(request.form['published_by'])
     categories.append(request.form['categories'])
     min_players = request.form['min_players']
@@ -172,10 +174,12 @@ def post_boardgame():
     }
     print(game)
 
-    auth = requests.get("http://127.0.0.1:8000/auth")
+    auth_to_post = {'username':request.form['admin_user'], 'password':request.form['admin_pw']}
+    auth = requests.post("http://127.0.0.1:8000/auth", json=auth_to_post)
     token = auth.json()
 
-    print(token)
+
+    print("TOKEN:",token)
     for key in token.keys():
       t = str(token[key])
       
@@ -202,6 +206,7 @@ def put_boardgame():
 
     game_id = request.form['id']
     name = request.form['name']
+    rank = request.form['board_game_rank']
     published_by.append(request.form['published_by'])
     categories.append(request.form['categories'])
     min_players = request.form['min_players']
@@ -216,13 +221,16 @@ def put_boardgame():
     thumbnail = request.form['thumbnail']
     year = request.form['year']
 
+    #print("http://127.0.0.1:8000/details/" + str(game_id))
     r = requests.get("http://127.0.0.1:8000/details/" + str(game_id))
     searched_game = r.json()
 
-    print(searched_game)
+    #print(searched_game)
 
     if name == "":
       name = str(searched_game['Name'])
+    if rank == "":
+      rank = str(searched_game['Board_Game_Rank'])
     if published_by[0] == "":
       published_by = []
       published_by.append(searched_game['Publisher'])
@@ -270,14 +278,20 @@ def put_boardgame():
       'Year_Published': int(year)
     }
 
-    print(game)
+    # game['Publisher'] = ast.literal_eval(game['Publisher'])
+    # game['Category'] = ast.literal_eval(game['Category'])
+    # game['Expansion'] = ast.literal_eval(game['Expansion'])
+    # game['Board_Game_Family'] = ast.literal_eval(game['Board_Game_Family'])
+    # game['Mechanic'] = ast.literal_eval(game['Mechanic'])
 
-    auth = requests.get("http://127.0.0.1:8000/auth")
+    auth_to_post = {'username':request.form['admin_user'], 'password':request.form['admin_pw']}
+    auth = requests.post("http://127.0.0.1:8000/auth", json=auth_to_post)
     token = auth.json()
     for key in token.keys():
       t = str(token[key])
 
     r = requests.put("http://127.0.0.1:8000/details/", json=game, headers={'AUTH-TOKEN': t})
+    print(r)
     inputgame = r.json()
     print(inputgame)
 
@@ -353,10 +367,9 @@ def post_review():
       'Rating': float(rating),
       'Comment': comment,
     }
-    
-    print(review)
 
-    auth = requests.get("http://127.0.0.1:8000/auth")
+    auth_to_post = {'username':request.form['admin_user'], 'password':request.form['admin_pw']}
+    auth = requests.post("http://127.0.0.1:8000/auth", json=auth_to_post)
     token = auth.json()
 
     print(token)

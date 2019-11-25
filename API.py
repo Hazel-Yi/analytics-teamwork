@@ -746,11 +746,11 @@ class Token(Resource):
     @api.response(200, 'Successful')
     @api.doc(description="Generates a authentication token")
     @api.expect(credential_parser, validate=True)
-    def get(self):
+    def post(self):
         args = credential_parser.parse_args()
 
         username = args.get('username')
-        password = args.get('password')
+        password = args.get('password') # no encryption
         mm.increment('/auth')
         mm.save()
         if username == 'admin' and password == 'admin':
