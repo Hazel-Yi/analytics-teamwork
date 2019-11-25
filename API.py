@@ -130,7 +130,7 @@ game_model = api.model('Game', {
 @api.route('/api_usage')
 class Api_Usage(Resource):
     @api.response(200, 'Successful')
-    @api.doc(description='Get Api Usage Stats')
+    @api.doc(description='Returns all available API statistics. These statistics consist of a counter to track the number of successful site visits that have been made for each unique URL category or endpoint.')
     def get(self):
         api_usage = mm.metadata
         mm.increment('/api_usage')
@@ -144,7 +144,7 @@ class Board_Games_Details_List(Resource):
     ###GET GAMES DETAILS###
     @api.response(200, 'Successful')
     @api.doc(
-        description='Get all board games details',
+        description='Returns a list of board games and detailed information about each game. Detailed information includes the name of the board game, its popularity rank relative to other games, companies that have published this game, and aspects of its game characteristics. The output can also be filtered by page to reduce server load.',
         params={
             'Page': 'Specify page number, default is the first page',
             'PageElements': 'Number of elements to return per page, default is 20' 
@@ -178,7 +178,7 @@ class Board_Games_Details_List(Resource):
     ###POST GAME DETAILS###
     @api.response(201, 'Board Game Details Added Successfully')
     @api.response(400, 'Validation Error')
-    @api.doc(description="Add new board game details")
+    @api.doc(description="Inserts the details of a new board game into the database. All fields must be provided. For data validation, the following rules must be followed: Game_ID cannot already exist, Board_Game_Rank > 0, Min_players <= Max_players, Min_playtime <=  Max_playtime, Year_Published cannot be future year, and all integers must be greater than 0. Authorisation is needed.")
     @api.expect(detail_model, validate=True)
     @requires_auth
     def post(self):
@@ -259,7 +259,7 @@ class Board_Games_Details_List(Resource):
     @api.response(400, 'Validation Error')
     @api.response(200, 'Successful')
     @api.expect(detail_model)
-    @api.doc(description="Update a game details by its ID")
+    @api.doc(description="Updates the details of an existing game in the database by its ID. Game_ID must already be registered in the database for this request to be successful. Data validation conditions are otherwise identical to POST /details. Authorisation is needed.")
     @requires_auth
     def put(self):
         details = request.json
@@ -342,7 +342,7 @@ class Board_Games(Resource):
     ###GET GAME DETAILS BY ID###
     @api.response(404, 'Game not found')
     @api.response(200, 'Successful')
-    @api.doc(description="Get a game details by its ID")
+    @api.doc(description="Returns the details of a game by its ID. The Game_ID for the desired game must exist. Otherwise, the output format of any single game is identical to GET /details.")
     def get(self, id):
         conn = create_connection('Database')
         df = pd.read_sql_query(
@@ -362,7 +362,7 @@ class Board_Games(Resource):
        
     @api.response(404, 'Game was not found')
     @api.response(200, 'Successful')
-    @api.doc(description="Delete a Game by its ID")
+    @api.doc(description="Deletes a game by its ID. The Game_ID for the desired game must exist.")
     @requires_auth
     def delete(self, id):
         conn = create_connection('Database')
@@ -386,7 +386,7 @@ class Board_Games_Name(Resource):
     ###GET GAME DETAILS BY NAME###
     @api.response(404, 'Game not found')
     @api.response(200, 'Successful')
-    @api.doc(description="Get a game details by its name")
+    @api.doc(description="Returns the detailed description and characteristics of a game, given a search (identical character match) on its name. The name of the game must exist. Otherwise, the output format of any single game is identical to GET /details.")
     def get(self, name):
         conn = create_connection('Database')
         df = pd.read_sql_query(
@@ -404,7 +404,7 @@ class Board_Games_Year(Resource):
     ###GET GAMES DETAILS BY YEAR OF PUBLISHING###
     @api.response(404, 'No Games Published That Year')
     @api.response(200, 'Successful')
-    @api.doc(description="Get all games details by publishing year")
+    @api.doc(description="Returns the detailed description of all games published in the specified year. The year must be a valid number. The output format is identical to GET /details.")
     def get(self, year):
         try:
             year = int(year)
@@ -429,7 +429,7 @@ class addReviews(Resource):
     ###POST REVIEW###
     @api.response(201, 'Review Added Successfully')
     @api.response(400, 'Validation Error')
-    @api.doc(description="Add a new review")
+    @api.doc(description="Inserts a new game review into the database. For this request to be successful, the Game_ID must exist,  and the rating must be between 1 and 10. Authorisation is required.")
     @api.expect(review_model, validate=True)
     @requires_auth
     def post(self):
@@ -464,7 +464,7 @@ class Reviews(Resource):
     ###GET REVIEWS FOR A GAME###
     @api.response(404, 'Review not found')
     @api.response(200, 'Successful')
-    @api.doc(description="Get all reviews for a specific game")
+    @api.doc(description="Returns all reviews for a specified game (by ID). The Game_ID must exist.")
     def get(self, id):
         conn = create_connection('Database')
         df = pd.read_sql_query(
@@ -482,7 +482,7 @@ class Reviews(Resource):
 
     @api.response(404, 'Review was not found')
     @api.response(200, 'Successful')
-    @api.doc(description="Delete review(s) by its Game ID")
+    @api.doc(description="Deletes review(s) by their Game ID. Authorisation is required.")
     @requires_auth
     def delete(self, id):
         conn = create_connection('Database')
@@ -505,7 +505,7 @@ class Reviews(Resource):
 class Board_Games_Details_Top10List(Resource):
     ###GET TOP 10 GAMES DETAILS###
     @api.response(200, 'Successful')
-    @api.doc(description='Get Top 10 board games details')
+    @api.doc(description='Returns the details of the top 10 board games of all time. The output format is identical to GET /details.')
     def get(self):
         conn = create_connection('Database')
         df = pd.read_sql_query(
@@ -526,7 +526,7 @@ class Board_Games_Details_Top10List(Resource):
 class Board_Games_Details_TopYearlyGame(Resource):
     ###GET TOP GAME OF EACH YEAR###
     @api.response(200, 'Successful')
-    @api.doc(description='Get the top-rated game for each year, alongside its ID, name, average score, and number of reviews counted. Years in BC will be negative.')
+    @api.doc(description='Returns the the top-rated game for each year, alongside its ID, name, average score, and number of reviews counted. Years in BC will be negative.')
     def get(self):
         conn = create_connection('Database')
         sql = '''
@@ -546,7 +546,7 @@ order by Year asc;'''
 class Trends_Yearly_Published(Resource):
     ###GET NUMBER OF GAMES PUBLISHED PER YEAR###
     @api.response(200, 'Successful')
-    @api.doc(description='Get the number of game publications per year. Years in BC will be negative.')
+    @api.doc(description='Returns the number of game publications per year. Years in BC will be negative.')
     def get(self):
         conn = create_connection('Database')
         df = pd.read_sql_query(
@@ -560,7 +560,7 @@ class Trends_Yearly_Published(Resource):
 class Trends_Rating_Statistics(Resource):
     ###GET BOX PLOT OF RATINGS PER YEAR###
     @api.response(200, 'Successful')
-    @api.doc(description='Gets the min, max, median, 1st percentile, 3rd percentile, average and number of all board game ratings for each year. Years in BC will be negative.')
+    @api.doc(description='Returns the min, max, median, 1st percentile, 3rd percentile, average and number of all board game ratings for each year. Years in BC will be negative.')
     def get(self):
         # cached from gen_review_stats.py due to compute time requirements
         with open('review_rating_quantiles.json','r') as f:
@@ -588,7 +588,7 @@ class Recommendations(Resource):
     @api.response(200, 'Successful')
     @api.response(404, 'No Recommendations Found')
     #@api.expect(game_suggestion)
-    @api.doc(description="Get recommendations for a specific game")
+    @api.doc(description="Returns recommendations for a specified game by ID. Multiple parameters are available to filter the output. The output format is identical to GET /details.")
     def get(self, id):
         details = request.args
         # print(details)
@@ -638,7 +638,7 @@ class RecommendationsByName(Resource):
     @api.response(200, 'Successful')
     @api.response(404, 'No Recommendations Found')
     #@api.expect(game_suggestion_by_name)
-    @api.doc(description="Get recommendations for a specific game")
+    @api.doc(description="Returns recommendations for a specified game name. The Name field is compulsory. The behaviour is otherwise identical to GET /recommendations/\{id\}.")
     def get(self):
         details = request.args
         # Get reviews
@@ -751,7 +751,7 @@ credential_parser.add_argument('password', type=str)
 @api.route('/auth')
 class Token(Resource):
     @api.response(200, 'Successful')
-    @api.doc(description="Generates a authentication token")
+    @api.doc(description="Returns a newly generated authentication token for admins to use in POST, PUT and DELETE operations.")
     @api.expect(credential_parser, validate=True)
     def post(self):
         args = credential_parser.parse_args()
