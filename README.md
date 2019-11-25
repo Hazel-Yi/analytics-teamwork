@@ -7,6 +7,10 @@ The board games information is sourced from Kaggle: https://www.kaggle.com/jvane
 
 Pricing information is webscrapped from https://www.boardgamegateway.com/ and https://www.amazon.com (US and AU).
 
+## Additional Documentation
+
+The Swagger JSON file and the single page document for the API use cases (`Comp9321 Use Cases.docx`) can both be found in the folder `documentation` under this root directory.
+
 ## Setup Instructions
 
 Make sure you have (at least) the following installed:
