@@ -83,6 +83,10 @@ def get_boardgame_id():
     search_id = request.form['search']
     print("searched for a game with id " + search_id) 
     r = requests.get("http://127.0.0.1:8000/details/" + str(search_id))
+
+    if(r.status_code == 404):
+      return render_template('Game404.html', title='Find Boardgame',value=search_id)
+
     game = r.json()
     for key in game.keys():
       if key == 'Name':
@@ -105,8 +109,12 @@ def get_boardgame_name():
     search_name = request.form['search']
     print("searched for a game with name " + search_name) 
     r = requests.get("http://127.0.0.1:8000/details/" + str(search_name))
-    games = r.json()
+    print(r.status_code)
 
+    if(r.status_code == 404):
+      return render_template('Game404.html', title='Find Boardgame',value=search_name)
+
+    games = r.json()
     listlist = []
     for game in games:
       game_item = {}
@@ -139,7 +147,6 @@ def post_boardgame():
     game_id = request.form['id']
     name = request.form['name']
     rank = request.form['board_game_rank']
-    #rank = ""
     published_by.append(request.form['published_by'])
     categories.append(request.form['categories'])
     min_players = request.form['min_players']
@@ -187,6 +194,9 @@ def post_boardgame():
     
     r = requests.post("http://127.0.0.1:8000/details", json=game, headers={'AUTH-TOKEN': t})
 
+    if(r.status_code == 401):
+      return render_template('401.html', title='Add a Boardgame')
+
     print("Status Code:" + str(r.status_code))
     resp = r.json()
 
@@ -221,7 +231,6 @@ def put_boardgame():
     thumbnail = request.form['thumbnail']
     year = request.form['year']
 
-    #print("http://127.0.0.1:8000/details/" + str(game_id))
     r = requests.get("http://127.0.0.1:8000/details/" + str(game_id))
     searched_game = r.json()
 
@@ -278,11 +287,6 @@ def put_boardgame():
       'Year_Published': int(year)
     }
 
-    # game['Publisher'] = ast.literal_eval(game['Publisher'])
-    # game['Category'] = ast.literal_eval(game['Category'])
-    # game['Expansion'] = ast.literal_eval(game['Expansion'])
-    # game['Board_Game_Family'] = ast.literal_eval(game['Board_Game_Family'])
-    # game['Mechanic'] = ast.literal_eval(game['Mechanic'])
 
     auth_to_post = {'username':request.form['admin_user'], 'password':request.form['admin_pw']}
     auth = requests.post("http://127.0.0.1:8000/auth", json=auth_to_post)
@@ -291,7 +295,11 @@ def put_boardgame():
       t = str(token[key])
 
     r = requests.put("http://127.0.0.1:8000/details/", json=game, headers={'AUTH-TOKEN': t})
-    print(r)
+    print(r.status_code)
+    
+    if(r.status_code == 401):
+      return render_template('401.html', title='Update a Boardgame')
+
     inputgame = r.json()
     print(inputgame)
 
@@ -321,6 +329,10 @@ def get_review():
     search_id = request.form['search']
     print("searched for reviews with game id " + search_id) 
     r = requests.get("http://127.0.0.1:8000/reviews/" + str(search_id))
+    
+    if(r.status_code == 404):
+      return render_template('Review404.html', title='Find Reviews',value=search_id)
+    
     reviews = r.json()
 
     listlist = []
@@ -381,6 +393,9 @@ def post_review():
     r = requests.post("http://127.0.0.1:8000/reviews", json=review, headers={'AUTH-TOKEN': t})
 
     print("Status Code:" + str(r.status_code))
+    if(r.status_code == 401):
+      return render_template('401.html', title='Add a Review')
+
     resp = r.json()
 
     print(resp['message'])
