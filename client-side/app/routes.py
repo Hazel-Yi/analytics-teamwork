@@ -308,20 +308,54 @@ def put_boardgame():
 @app.route('/get_rec', methods=['GET', 'POST'])
 def get_rec():
   '''get 30 recommended games provided by the ML model'''
+  games = None
+  categories = ['Action / Dexterity','Abstract Strategy', 'Adventure', 'Age of Reason', 'American Civil War',  'American Indian Wars', 'American Revolutionary War', 'American West', 
+    'Ancient', 'Animals', 'Arabian', 'Aviation / Flight', 'Bluffing', 'Book',  'Card Game', 'Children\'s Game', 'City Building', 'Civil War', 'Civilization',  'Collectible Components',
+     'Comic Book / Strip', 'Deduction', 'Dice', 'Economic','Educational', 'Electronic','Environmental','Expansion for Base-game','Exploration','Fan Expansion','Fantasy','Farming','Fighting',
+     'Game System','Horror','Humor','Industry / Manufacturing','Korean War','Mafia','Math','Mature / Adult','Maze','Medical','Medieval','Memory','Miniatures','Modern Warfare','Movies / TV / Radio theme',
+     'Murder/Mystery','Music','Mythology','Napoleonic','Nautical','Negotiation','Novel-based','Number','Party Game','Pike and Shot','Pirates','Political','Post-Napoleonic','Prehistoric','Print & Play',
+     'Puzzle','Racing','Real-time','Religious','Renaissance','Science Fiction','Space Exploration','Spies/Secret Agents','Sports','Territory Building','Trains','Transportation','Travel','Trivia',
+     'Video Game Theme','Vietnam War','Wargame','Word Game','World War I','World War II','Zombies']
   if request.method == 'POST':
-    search_id = request.form['search']
-    num_rec = int(request.form['num_rec'])
+    print(request.form)
+    print(request.form.getlist('category'))
+    results = request.form
+    # return ('okay')
 
-    r = requests.get("http://127.0.0.1:8000/recommendations/" + str(search_id))
+
+    query_params = {}
+
+    if (results['search'] != ''):
+      query_params['Name'] = results['search']
+    if (results['min_players'] != ''):
+      query_params['Min_players'] = results['min_players']
+    if (results['max_players'] != ''):
+      query_params['Max_players'] = results['max_players']
+    if (results['min_year'] != ''):
+      query_params['Min_Year_Published'] = results['min_year'] 
+    if (results['max_year'] != ''):
+      query_params['Max_Year_Published'] = results['max_year']
+    if (results['min_playtime'] != ''):
+      query_params['Min_playtime'] = results['min_playtime']
+    if (results['max_playtime'] != ''):
+      query_params['Max_Year_Published'] = results['max_playtime']
+    if (len(request.form.getlist('category')) != 0):
+      query_params['Category'] = str(request.form.getlist('category'))
+    print(query_params)
+
+    r = requests.get("http://127.0.0.1:8000/recommendations", params=query_params)
+    print(r)
     games = r.json()
+    print('results')
+    print(games)
 
-    rec = games[0:num_rec]
 
     '''print(games[0])'''
+  return render_template('get_rec.html', title='Recommended Games', games=games, options=categories)
 
-    return render_template('get_rec_2.html', title='Recommended Games', rec=rec, num_rec=num_rec) 
-  else:
-    return render_template('get_rec.html', title='Recommended Games')
+#     return render_template('get_rec_2.html', title='Recommended Games', rec=rec, num_rec=num_rec) 
+#   else:
+
 
 @app.route('/get_review', methods=['GET', 'POST'])
 def get_review():
