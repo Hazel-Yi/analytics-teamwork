@@ -1,0 +1,625 @@
+{
+    "swagger": "2.0",
+    "basePath": "/",
+    "paths": {
+        "/api_usage": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Successful"
+                    }
+                },
+                "description": "Returns all available API statistics. These statistics consist of a counter to track the number of successful site visits that have been made for each unique URL category or endpoint.",
+                "operationId": "get_api__usage",
+                "tags": [
+                    "Board Game Geek"
+                ]
+            }
+        },
+        "/auth": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "Successful"
+                    }
+                },
+                "description": "Returns a newly generated authentication token for admins to use in POST, PUT and DELETE operations.",
+                "operationId": "post_token",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "type": "string"
+                    },
+                    {
+                        "name": "password",
+                        "in": "query",
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Board Game Geek"
+                ]
+            }
+        },
+        "/details": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Successful"
+                    }
+                },
+                "description": "Returns a list of board games and detailed information about each game. Detailed information includes the name of the board game, its popularity rank relative to other games, companies that have published this game, and aspects of its game characteristics. The output can also be filtered by page to reduce server load.",
+                "operationId": "get_board__games__details__list",
+                "parameters": [
+                    {
+                        "description": "Specify page number, default is the first page",
+                        "name": "Page",
+                        "type": "string",
+                        "in": "query"
+                    },
+                    {
+                        "description": "Number of elements to return per page, default is 20",
+                        "name": "PageElements",
+                        "type": "string",
+                        "in": "query"
+                    }
+                ],
+                "tags": [
+                    "Board Game Geek"
+                ]
+            },
+            "post": {
+                "responses": {
+                    "400": {
+                        "description": "Validation Error"
+                    },
+                    "201": {
+                        "description": "Board Game Details Added Successfully"
+                    }
+                },
+                "description": "Inserts the details of a new board game into the database. All fields must be provided. For data validation, the following rules must be followed: Game_ID cannot already exist, Board_Game_Rank > 0, Min_players <= Max_players, Min_playtime <=  Max_playtime, Year_Published cannot be future year, and all integers must be greater than 0. Authorisation is needed.",
+                "operationId": "post_board__games__details__list",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "required": true,
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Detail"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Board Game Geek"
+                ]
+            },
+            "put": {
+                "responses": {
+                    "200": {
+                        "description": "Successful"
+                    },
+                    "400": {
+                        "description": "Validation Error"
+                    },
+                    "404": {
+                        "description": "Game not found"
+                    }
+                },
+                "description": "Updates the details of an existing game in the database by its ID. Game_ID must already be registered in the database for this request to be successful. Data validation conditions are otherwise identical to POST /details. Authorisation is needed.",
+                "operationId": "put_board__games__details__list",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "required": true,
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Detail"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Board Game Geek"
+                ]
+            }
+        },
+        "/details/top10": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Successful"
+                    }
+                },
+                "description": "Returns the details of the top 10 board games of all time. The output format is identical to GET /details.",
+                "operationId": "get_board__games__details__top10_list",
+                "tags": [
+                    "Board Game Geek"
+                ]
+            }
+        },
+        "/details/top_yearly": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Successful"
+                    }
+                },
+                "description": "Returns the the top-rated game for each year, alongside its ID, name, average score, and number of reviews counted. Years in BC will be negative.",
+                "operationId": "get_board__games__details__top_yearly_game",
+                "tags": [
+                    "Board Game Geek"
+                ]
+            }
+        },
+        "/details/year/{year}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "Game Year of Publishing",
+                    "name": "year",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Successful"
+                    },
+                    "404": {
+                        "description": "No Games Published That Year"
+                    }
+                },
+                "description": "Returns the detailed description of all games published in the specified year. The year must be a valid number. The output format is identical to GET /details.",
+                "operationId": "get_board__games__year",
+                "tags": [
+                    "Board Game Geek"
+                ]
+            }
+        },
+        "/details/{id}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "Game ID",
+                    "name": "id",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Successful"
+                    },
+                    "404": {
+                        "description": "Game not found"
+                    }
+                },
+                "description": "Returns the details of a game by its ID. The Game_ID for the desired game must exist. Otherwise, the output format of any single game is identical to GET /details.",
+                "operationId": "get_board__games",
+                "tags": [
+                    "Board Game Geek"
+                ]
+            },
+            "delete": {
+                "responses": {
+                    "200": {
+                        "description": "Successful"
+                    },
+                    "404": {
+                        "description": "Game was not found"
+                    }
+                },
+                "description": "Deletes a game by its ID. The Game_ID for the desired game must exist.",
+                "operationId": "delete_board__games",
+                "tags": [
+                    "Board Game Geek"
+                ]
+            }
+        },
+        "/details/{name}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "Game Name",
+                    "name": "name",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Successful"
+                    },
+                    "404": {
+                        "description": "Game not found"
+                    }
+                },
+                "description": "Returns the detailed description and characteristics of a game, given a search (identical character match) on its name. The name of the game must exist. Otherwise, the output format of any single game is identical to GET /details.",
+                "operationId": "get_board__games__name",
+                "tags": [
+                    "Board Game Geek"
+                ]
+            }
+        },
+        "/recommendations": {
+            "parameters": [
+                {
+                    "type": "list[string]",
+                    "in": "query",
+                    "description": "List of board game categories",
+                    "name": "Category"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Minimum number of players",
+                    "name": "Min_players"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Maximum number of players",
+                    "name": "Max_players"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Minimum recommended age",
+                    "name": "Min_age"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Minimum playtime",
+                    "name": "Min_playtime"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Maximum playtime",
+                    "name": "Max_playtime"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Min Year Published",
+                    "name": "Min_Year_Published"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Max Year Published",
+                    "name": "Max_Year_Published"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Number of results to return",
+                    "name": "N"
+                },
+                {
+                    "type": "string",
+                    "required": true,
+                    "in": "query",
+                    "description": "Name of the Board Game",
+                    "name": "Name"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "404": {
+                        "description": "No Recommendations Found"
+                    },
+                    "200": {
+                        "description": "Successful"
+                    }
+                },
+                "description": "Returns recommendations for a specified game name. The Name field is compulsory. The behaviour is otherwise identical to GET /recommendations/\\{id\\}.",
+                "operationId": "get_recommendations_by_name",
+                "tags": [
+                    "Board Game Geek"
+                ]
+            }
+        },
+        "/recommendations/{id}": {
+            "parameters": [
+                {
+                    "type": "list[string]",
+                    "in": "query",
+                    "description": "List of board game categories",
+                    "name": "Category"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Minimum number of players",
+                    "name": "Min_players"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Maximum number of players",
+                    "name": "Max_players"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Minimum recommended age",
+                    "name": "Min_age"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Minimum playtime",
+                    "name": "Min_playtime"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Maximum playtime",
+                    "name": "Max_playtime"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Min Year Published",
+                    "name": "Min_Year_Published"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Max Year Published",
+                    "name": "Max_Year_Published"
+                },
+                {
+                    "type": "int",
+                    "in": "query",
+                    "description": "Number of results to return",
+                    "name": "N"
+                },
+                {
+                    "in": "path",
+                    "description": "Game ID",
+                    "name": "id",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "404": {
+                        "description": "No Recommendations Found"
+                    },
+                    "200": {
+                        "description": "Successful"
+                    }
+                },
+                "description": "Returns recommendations for a specified game by ID. Multiple parameters are available to filter the output. The output format is identical to GET /details.",
+                "operationId": "get_recommendations",
+                "tags": [
+                    "Board Game Geek"
+                ]
+            }
+        },
+        "/reviews": {
+            "post": {
+                "responses": {
+                    "400": {
+                        "description": "Validation Error"
+                    },
+                    "201": {
+                        "description": "Review Added Successfully"
+                    }
+                },
+                "description": "Inserts a new game review into the database. For this request to be successful, the Game_ID must exist,  and the rating must be between 1 and 10. Authorisation is required.",
+                "operationId": "post_add_reviews",
+                "parameters": [
+                    {
+                        "name": "payload",
+                        "required": true,
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/Review"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Board Game Geek"
+                ]
+            }
+        },
+        "/reviews/{id}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "Game ID",
+                    "name": "id",
+                    "required": true,
+                    "type": "integer"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Successful"
+                    },
+                    "404": {
+                        "description": "Review not found"
+                    }
+                },
+                "description": "Returns all reviews for a specified game (by ID). The Game_ID must exist.",
+                "operationId": "get_reviews",
+                "tags": [
+                    "Board Game Geek"
+                ]
+            },
+            "delete": {
+                "responses": {
+                    "200": {
+                        "description": "Successful"
+                    },
+                    "404": {
+                        "description": "Review was not found"
+                    }
+                },
+                "description": "Deletes review(s) by their Game ID. Authorisation is required.",
+                "operationId": "delete_reviews",
+                "tags": [
+                    "Board Game Geek"
+                ]
+            }
+        },
+        "/trends/num_published": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Successful"
+                    }
+                },
+                "description": "Returns the number of game publications per year. Years in BC will be negative.",
+                "operationId": "get_trends__yearly__published",
+                "tags": [
+                    "Board Game Geek"
+                ]
+            }
+        },
+        "/trends/rating_stats": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Successful"
+                    }
+                },
+                "description": "Returns the min, max, median, 1st percentile, 3rd percentile, average and number of all board game ratings for each year. Years in BC will be negative.",
+                "operationId": "get_trends__rating__statistics",
+                "tags": [
+                    "Board Game Geek"
+                ]
+            }
+        }
+    },
+    "info": {
+        "title": "Board Game Geek Dataset",
+        "version": "1.5",
+        "description": "..."
+    },
+    "produces": [
+        "application/json"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "securityDefinitions": {
+        "API-KEY": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "AUTH-TOKEN"
+        }
+    },
+    "security": [
+        {
+            "API-KEY": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "Board Game Geek",
+            "description": "Default namespace"
+        }
+    ],
+    "definitions": {
+        "Detail": {
+            "properties": {
+                "Game_ID": {
+                    "type": "integer"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "Board_Game_Rank": {
+                    "type": "integer"
+                },
+                "Publisher": {
+                    "type": "string"
+                },
+                "Category": {
+                    "type": "array",
+                    "example": "nullable list",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "Min_players": {
+                    "type": "integer"
+                },
+                "Max_players": {
+                    "type": "integer"
+                },
+                "Min_age": {
+                    "type": "integer"
+                },
+                "Min_playtime": {
+                    "type": "integer"
+                },
+                "Max_playtime": {
+                    "type": "integer"
+                },
+                "Description": {
+                    "type": "string"
+                },
+                "Expansion": {
+                    "type": "array",
+                    "example": "nullable list",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "Board_Game_Family": {
+                    "type": "array",
+                    "example": "nullable list",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "Mechanic": {
+                    "type": "string"
+                },
+                "Thumbnail": {
+                    "type": "string"
+                },
+                "Year_Published": {
+                    "type": "integer"
+                }
+            },
+            "type": "object"
+        },
+        "Review": {
+            "properties": {
+                "Game_ID": {
+                    "type": "integer"
+                },
+                "User": {
+                    "type": "string"
+                },
+                "Rating": {
+                    "type": "number"
+                },
+                "Comment": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "responses": {
+        "ParseError": {
+            "description": "When a mask can't be parsed"
+        },
+        "MaskError": {
+            "description": "When any error occurs on mask"
+        }
+    }
+}
