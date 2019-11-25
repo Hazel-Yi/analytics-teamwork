@@ -1,9 +1,12 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from flask_paginate import Pagination, get_page_parameter
 import requests
 from app import app
 import json
 import ast
+from flask_cors import CORS
+
+CORS(app)
 
 @app.route('/')
 @app.route('/get_top10')
@@ -126,6 +129,18 @@ def get_boardgame_id2(id):
         if key == 'Expansion':
             expansions = game[key]
     return render_template('get_boardgame_id_2.html', title='Find Boardgame', name=name, published_by=published_by, categories=categories, description=description, expansions=expansions)
+
+
+@app.route('/analytics/', methods=['GET'])
+def analytics():
+    return render_template('analytics.html')
+
+@app.route('/analytics/data', methods=['GET'])
+def analytics2():
+    result = requests.get('http://127.0.0.1:8000/api_usage').json()
+    response = jsonify(result)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 
 @app.route('/get_boardgame_name', methods=['GET', 'POST'])

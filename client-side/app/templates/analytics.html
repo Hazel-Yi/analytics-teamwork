@@ -1,0 +1,182 @@
+<html>
+
+  <head>
+    <title>{{ title }}</title>
+    <style>
+      table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        table-layout: fixed;
+        width: 100%;
+      }
+      td, th {
+        border: 1px solid #dddddd;
+        text-align: center;
+        padding: 8px;
+      }
+      button {
+        border: none;
+        background-color: inherit;
+        padding: 14px 28px;
+        font-size: 16px;
+        cursor: pointer;
+        display: inline-block;
+      }
+      button:hover {
+        background: #eee;
+      }
+      section {
+        display: -webkit-flex;
+        display: flex;
+      }
+      nav {
+        -webkit-flex: 1;
+        -ms-flex: 1;
+        flex: 1;
+        background: #FFFAFA;
+        padding: 20px;
+      }
+      nav ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      nav a {
+        padding: 6px 8px 6px 16px;
+        text-decoration: none;
+        font-size: 18px;
+        color: #2196F3;
+        display: block;
+      }
+      article {
+        -webkit-flex: 3;
+        -ms-flex: 3;
+        flex: 3;
+        background-color: #FDF5E6;
+        padding: 10px;
+      }
+      h1 { 
+        font-family: Candara; 
+        font-size: 24px; 
+        font-style: normal; 
+        font-variant: normal; 
+        font-weight: bold; 
+        line-height: 26px; 
+      }
+      h3 { 
+        font-family: Candara, Calibri, Segoe, "Segoe UI", Optima, Arial, sans-serif; 
+        font-size: 14px; 
+        font-style: normal; 
+        font-variant: normal; 
+        font-weight: bold; 
+        line-height: 15px; 
+      } 
+      p { 
+        font-family: Candara, Calibri, Segoe, "Segoe UI", Optima, Arial, sans-serif; 
+        font-size: 14px; 
+        font-style: normal; 
+        font-variant: normal; 
+        font-weight: 400; 
+        line-height: 20px; 
+      } 
+      blockquote { 
+        font-family: Candara, Calibri, Segoe, "Segoe UI", Optima, Arial, sans-serif; 
+        font-size: 21px; 
+        font-style: normal; 
+        font-variant: normal; 
+        font-weight: 400; 
+        line-height: 30px; 
+      } 
+      pre { 
+        font-family: Candara, Calibri, Segoe, "Segoe UI", Optima, Arial, sans-serif; 
+        font-size: 13px; 
+        font-style: normal; 
+        font-variant: normal; 
+        font-weight: 400; 
+        line-height: 18px; 
+      }
+    </style>
+  </head>
+    
+  <body>
+    <br>
+    <h1>FIND A BOARDGAME</h1>
+    <br>
+    <section>
+      <nav>
+        <ul>
+          <li><a href="{{ url_for('get_top10') }}">Popular Boardgames</a></li>
+          <li><a href="{{ url_for('get_boardgame') }}">All Boardgames</a></li>
+          <li><a href="{{ url_for('find_boardgame') }}">Find a Boardgame</a></li>
+          <li><a href="{{ url_for('post_boardgame') }}">Add a Boardgame</a></li>
+          <li><a href="{{ url_for('put_boardgame') }}">Update a Boardgame</a></li>
+          <li><a href="{{ url_for('get_review') }}">Find Reviews</a></li>
+          <li><a href="{{ url_for('post_review') }}">Add a Review</a></li>
+          <li><a href="{{ url_for('get_rec') }}">Recommended Boardgames</a></li>
+          <li><a href="{{ url_for('num_published') }}">Trends</a></li>
+        </ul>
+      </nav>
+
+      <article>
+        <canvas id="myChart" width="800" height="450"></canvas>
+      </article>
+    </section>
+    
+  </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+  <script>
+
+    var result;
+
+    fetch('http://127.0.0.1:5000/analytics/data')
+        .then((resp) => {
+            console.log(resp)
+            return resp.json()
+        }) // Transform the data into json
+        .then(function(data) {
+        // Create and append the li's to the ul
+            console.log(data);
+            result = data;
+
+            let colourArray = [];
+            backgrounds = ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"];
+            for (i = 0; i < Object.keys(result).length; i++) {
+                colourArray.push(backgrounds[i%5])
+            } 
+
+
+            new Chart(document.getElementById("myChart"), {
+                type: 'horizontalBar',
+                data: {
+                labels: Object.keys(result) ,
+                datasets: [
+                    {
+                    label: "Usage rate",
+                    backgroundColor: colourArray,
+                    data: Object.values(result)
+                    }
+                ]
+                },
+                options: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: 'Endpoint usage for API'
+                }
+                }
+            });
+        })
+    
+        function getRandomColor() {
+            var letters = '0123456789ABCDEF'.split('');
+            var color = '#';
+            for (var i = 0; i < 6; i++ ) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+}
+
+    
+
+  </script>
+
+</html>
