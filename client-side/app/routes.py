@@ -107,28 +107,28 @@ def get_boardgame_id():
   else:
     return render_template('get_boardgame_id.html', title='Find Boardgame')
 
-@app.route('/get_boardgame_id/<int:id>', methods=['GET'])
-def get_boardgame_id2(id):
-    search_id = str(id)
-    print("searched for a game with id " + search_id) 
-    r = requests.get("http://127.0.0.1:8000/details/" + search_id)
+# @app.route('/get_boardgame_id/<int:id>', methods=['GET'])
+# def get_boardgame_id2(id):
+#     search_id = str(id)
+#     print("searched for a game with id " + search_id) 
+#     r = requests.get("http://127.0.0.1:8000/details/" + search_id)
 
-    if(r.status_code == 404):
-        return render_template('Game404.html', title='Find Boardgame',value=search_id)
+#     if(r.status_code == 404):
+#         return render_template('Game404.html', title='Find Boardgame',value=search_id)
 
-    game = r.json()
-    for key in game.keys():
-        if key == 'Name':
-            name = str(game[key])
-        if key == 'Publisher':
-            published_by = game[key]
-        if key == 'Category':
-            categories = game[key]
-        if key == 'Description':
-            description = str(game[key])
-        if key == 'Expansion':
-            expansions = game[key]
-    return render_template('get_boardgame_id_2.html', title='Find Boardgame', name=name, published_by=published_by, categories=categories, description=description, expansions=expansions)
+#     game = r.json()
+#     for key in game.keys():
+#         if key == 'Name':
+#             name = str(game[key])
+#         if key == 'Publisher':
+#             published_by = game[key]
+#         if key == 'Category':
+#             categories = game[key]
+#         if key == 'Description':
+#             description = str(game[key])
+#         if key == 'Expansion':
+#             expansions = game[key]
+#     return render_template('get_boardgame_id_2.html', title='Find Boardgame', name=name, published_by=published_by, categories=categories, description=description, expansions=expansions)
 
 
 @app.route('/analytics/', methods=['GET'])
