@@ -273,12 +273,12 @@ class Board_Games_Details_List(Resource):
 
         df = pd.read_sql_query(
             "SELECT Game_ID FROM Details WHERE Name = ?;", conn, params=[details['Name']])                             # Check if there is another game with the same updated Name
-        if len(df) > 0:
-            api.abort(400, "Game '{}' already exists with Game_ID={}".format(
-                details['Name'], df.loc[0][0]))
+        # if len(df) > 0:
+        #     api.abort(400, "Game '{}' already exists with Game_ID={}".format(
+        #         details['Name'], df.loc[0][0]))
         if not (details['Name']):
             api.abort(400, "Name field is missing")
-        details['Board_Game_Rank'] = details['Board_Game_Rank'].strip()
+        details['Board_Game_Rank'] = details['Board_Game_Rank']
         if not (details['Board_Game_Rank']):
             pass
         else:
