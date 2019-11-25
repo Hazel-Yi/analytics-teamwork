@@ -132,6 +132,10 @@
                 <td>{{ name }}</td>
               </tr>
               <tr>
+                  <td width="20%">Image</td>
+                  <td><img style="display:block;  margin-left: auto; margin-right: auto; width: 40%;" width=40% src={{ thumbnail }}></td>
+                </tr>
+              <tr>
                 <td width="20%">PUBLISHED BY</td>
                 <td>{{ published_by }}</td>
               </tr>
@@ -147,6 +151,15 @@
                 <td width="20%">EXPANSIONS</td>
                 <td>{{ expansions }}</td>
               </tr>
+              <tr>
+                  <td width="20%">PRICE</td>
+                  <td>
+                    <p>$ {% if price %}{{ price }} {% endif %}</p>
+                      {% if url %}
+                        <a href="{{ url }}">{{ url }}</a>                    
+                      {% endif %}
+                    </td>
+                </tr>
             </table>
       </article>
     </section>

@@ -103,7 +103,14 @@ def get_boardgame_id():
         description = str(game[key])
       if key == 'Expansion':
         expansions = game[key]
-    return render_template('get_boardgame_id_2.html', title='Find Boardgame', name=name, published_by=published_by, categories=categories, description=description, expansions=expansions)
+      if key == 'Thumbnail':
+        thumbnail = game[key]
+      if key == 'URL':
+        url = game[key]
+      if key == 'Price':
+        price = game[key]
+
+    return render_template('get_boardgame_id_2.html', title='Find Boardgame', name=name, published_by=published_by, categories=categories, description=description, expansions=expansions, thumbnail=thumbnail, price=price, url=url)
   else:
     return render_template('get_boardgame_id.html', title='Find Boardgame')
 
@@ -168,6 +175,8 @@ def get_boardgame_name():
         if key == 'Description':
           game_item[key] = str(game[key])
         if key == 'Expansion':
+          game_item[key] = game[key]
+        if key == 'Thumbnail':
           game_item[key] = game[key]
       listlist.append(game_item)
     
